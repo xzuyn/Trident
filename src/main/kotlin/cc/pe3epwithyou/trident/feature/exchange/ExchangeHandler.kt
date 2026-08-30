@@ -105,7 +105,7 @@ object ExchangeHandler {
 
     fun shouldRenderTooltip(slot: Slot): Boolean {
         if (!Config.Global.exchangeImprovements) return true
-        val screen = minecraft().screen ?: return true
+        val screen = minecraft().gui.screen() ?: return true
         if ("ISLAND EXCHANGE" !in screen.title.string) return true
         if (!inSlotBoundary(slot)) return true
         if (fetchingProgress.isLoading()) return true
@@ -117,7 +117,7 @@ object ExchangeHandler {
 
     fun renderSlot(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (!Config.Global.exchangeImprovements) return
-        val screen = minecraft().screen ?: return
+        val screen = minecraft().gui.screen() ?: return
         if ("ISLAND EXCHANGE" !in screen.title.string) return
         if (!inSlotBoundary(slot)) return
         if (fetchingProgress.isLoading()) return

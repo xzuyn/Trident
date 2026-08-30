@@ -82,7 +82,7 @@ object Doll {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Global.cosmeticPreview) return
 
-        val screen = minecraft().screen as? ContainerScreen ?: return
+        val screen = minecraft().gui.screen() as? ContainerScreen ?: return
         withContainerCtx(screen) {
             val x1 = leftPos() + 4
             val rectangle = ScreenRectangle(0, 0, x1, screenHeight())
@@ -175,7 +175,7 @@ object Doll {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Global.cosmeticPreview) return
 
-        val screen = minecraft().screen as? ContainerScreen ?: return
+        val screen = minecraft().gui.screen() as? ContainerScreen ?: return
         // If there's at least 1 item that can be previewed, we show the doll
         if (!shouldRender(screen)) return
 
@@ -207,7 +207,7 @@ object Doll {
     fun modifyTooltip(consumer: Consumer<Component>) {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Global.cosmeticPreview) return
-        val screen = minecraft().screen as? ContainerScreen ?: return
+        val screen = minecraft().gui.screen() as? ContainerScreen ?: return
         val item = (screen as AbstractContainerScreenAccessor).hoveredSlot?.item ?: return
         if (!DollCosmetics.validItem(item)) return
 

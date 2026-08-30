@@ -84,7 +84,7 @@ public class AbstractContainerScreenMixin extends Screen {
     @Inject(method = "onClose", at = @At(value = "HEAD"))
     public void injectOnClose(CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
-        if (minecraft.screen instanceof ContainerScreen s) {
+        if (minecraft.gui.screen() instanceof ContainerScreen s) {
             ContainerEvents.INSTANCE.getCLOSE().invoker().invoke(new ContainerContext(s));
         }
     }
@@ -100,7 +100,7 @@ public class AbstractContainerScreenMixin extends Screen {
     @Inject(method = "extractContents", at = @At(value = "TAIL"))
     public void injectRenderBackground(GuiGraphicsExtractor guiGraphics, int i, int j, float f, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
-        if (minecraft.screen instanceof ContainerScreen s) {
+        if (minecraft.gui.screen() instanceof ContainerScreen s) {
             if (s.getTitle().getString().contains("ISLAND EXCHANGE")) {
                 ExchangeHandler.INSTANCE.renderBackground(guiGraphics, leftPos, topPos);
             }
@@ -111,7 +111,7 @@ public class AbstractContainerScreenMixin extends Screen {
     public void init(CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         String screenTitle = this.getTitle().getString();
-        if (minecraft.screen instanceof ContainerScreen screen) {
+        if (minecraft.gui.screen() instanceof ContainerScreen screen) {
             ContainerEvents.INSTANCE.getINIT().invoker().invoke(new ContainerContext(screen));
             if (screenTitle.contains("ISLAND EXCHANGE") && Config.Global.INSTANCE.getExchangeImprovements()) {
                 int x = this.leftPos + 32;
@@ -123,7 +123,7 @@ public class AbstractContainerScreenMixin extends Screen {
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     public void injectMouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl, CallbackInfoReturnable<Boolean> cir) {
-        ContainerScreen containerScreen = minecraft.screen instanceof ContainerScreen s ? s : null;
+        ContainerScreen containerScreen = minecraft.gui.screen() instanceof ContainerScreen s ? s : null;
         if (containerScreen == null) return;
         ClickEvents.INSTANCE.getCLICK().invoker().invoke(new ContainerClickContext(bl, containerScreen, mouseButtonEvent, cir));
     }

@@ -24,7 +24,7 @@ object AugmentStatusInterface {
     fun render(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Fishing.showAugmentStatusInInterface) return
-        withContainerCtx(minecraft().screen as? ContainerScreen ?: return) {
+        withContainerCtx(minecraft().gui.screen() as? ContainerScreen ?: return) {
             supplies(this, graphics, slot)
             crabPots(this, graphics, slot)
         }

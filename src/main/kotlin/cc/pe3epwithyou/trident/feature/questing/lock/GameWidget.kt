@@ -50,7 +50,7 @@ class GameWidget(val game: Game) : AbstractWidget(0, 0, 14, 14, Component.empty(
             return
         }
         QuestLock.lockedGames.add(game)
-        val screen = minecraft().screen as? ContainerScreen ?: return
+        val screen = minecraft().gui.screen() as? ContainerScreen ?: return
         withContainerCtx(screen) {
             QuestListener.findQuests(this)
         }

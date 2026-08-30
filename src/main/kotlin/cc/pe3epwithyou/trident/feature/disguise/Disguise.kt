@@ -2,7 +2,7 @@ package cc.pe3epwithyou.trident.feature.disguise
 
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.events.container.ContainerEvents
-import cc.pe3epwithyou.trident.mixin.accessors.GuiAccessor
+import cc.pe3epwithyou.trident.mixin.accessors.HudAccessor
 import cc.pe3epwithyou.trident.state.Game
 import cc.pe3epwithyou.trident.state.MCCIState
 import cc.pe3epwithyou.trident.utils.DelayedAction
@@ -36,8 +36,8 @@ object Disguise {
 
     fun checkActionbar(): Boolean {
         if (!MCCIState.isOnIsland()) return false
-        val gui = minecraft().gui as GuiAccessor
-        val actionbar = gui.overlayMessageString ?: run {
+        val hud = minecraft().gui.hud as HudAccessor
+        val actionbar = hud.overlayMessageString ?: run {
             isDisguised = false
             return false
         }

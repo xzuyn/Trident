@@ -116,7 +116,7 @@ object CraftingNotifications {
             )
         )
 
-        minecraft().toastManager.addToast(CraftingToast(notification))
+        minecraft().gui.toastManager().addToast(CraftingToast(notification))
 
         Logger.sendMessage(msg)
     }

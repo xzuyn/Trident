@@ -2,7 +2,7 @@ package cc.pe3epwithyou.trident.feature.chat.dmlock
 
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.chat.ChatControllerManager
-import cc.pe3epwithyou.trident.mixin.accessors.GuiAccessor
+import cc.pe3epwithyou.trident.mixin.accessors.HudAccessor
 import cc.pe3epwithyou.trident.state.FontCollection
 import cc.pe3epwithyou.trident.state.MCCIState
 import cc.pe3epwithyou.trident.utils.Logger
@@ -41,8 +41,7 @@ object ReplyLock {
             if (!MCCIState.isOnIsland()) return
             if (!Config.Global.replyLock) return
             if (getReplyLockUser() == null) return
-            val gui = minecraft().gui
-            val actionBar = (gui as GuiAccessor).overlayMessageString ?: return
+            val actionBar = (minecraft().gui.hud as HudAccessor).overlayMessageString ?: return
 
             val middle: Int = graphics.guiWidth() / 2
             val hotbarHalf = 91

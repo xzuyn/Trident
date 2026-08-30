@@ -43,7 +43,7 @@ object UpgradeIndicator {
     }
 
     fun render(graphics: GuiGraphicsExtractor, slot: Slot) {
-        val screen = minecraft().screen ?: return
+        val screen = minecraft().gui.screen() ?: return
         if (checkUpgrade(screen, slot)) upgradeTexture.blit(graphics, slot.x - 1, slot.y + 9)
         if (checkLocked(screen, slot)) lockedTexture.blit(
             graphics,

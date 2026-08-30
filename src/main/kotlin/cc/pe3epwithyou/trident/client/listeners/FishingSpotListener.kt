@@ -8,6 +8,7 @@ import cc.pe3epwithyou.trident.utils.minecraft
 import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.projectile.FishingHook
 import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 
 object FishingSpotListener {
     data class FishingSpot(
@@ -54,7 +55,7 @@ object FishingSpotListener {
     }
 
     private fun findNearestSpot(hook: FishingHook): FishingSpot? {
-        val box = AABB.ofSize(hook.onPos.center, 3.5, 6.0, 3.5)
+        val box = AABB.ofSize(Vec3.atCenterOf(hook.onPos), 3.5, 6.0, 3.5)
         val level = minecraft().level ?: return null
         val entities = level.getEntities(null, box).filterIsInstance<Display.TextDisplay>()
         val display: Display.TextDisplay = entities.firstOrNull() ?: return null

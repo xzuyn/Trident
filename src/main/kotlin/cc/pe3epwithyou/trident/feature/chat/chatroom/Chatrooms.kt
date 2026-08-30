@@ -163,7 +163,7 @@ object Chatrooms {
     fun renderPinIcon(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Global.chatroomChannelButtons) return
-        val screen = minecraft().screen as? ContainerScreen ?: return
+        val screen = minecraft().gui.screen() as? ContainerScreen ?: return
         if (isInBoundary(slot.index)) {
             withContainerCtx(screen) {
                 requireTitle("CHAT ROOMS")
@@ -189,7 +189,7 @@ object Chatrooms {
     fun modifyTooltip(consumer: Consumer<Component>) {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Global.chatroomChannelButtons) return
-        val screen = minecraft().screen as? ContainerScreen ?: return
+        val screen = minecraft().gui.screen() as? ContainerScreen ?: return
 
         withContainerCtx(screen) {
             requireTitle("CHAT ROOMS")

@@ -15,7 +15,7 @@ object WayfinderModule {
         if (!MCCIState.fishingState.isGrotto) return@delayTicks
         val wayfinderStatus = MCCIState.fishingState.climate.getCurrentWayfinderStatus()
 
-        val events = (minecraft().gui.bossOverlay as BossHealthOverlayAccessor).events
+        val events = (minecraft().gui.hud.bossOverlay as BossHealthOverlayAccessor).events
         events.forEach { (_, value) ->
             Regex("""STABILITY: (\d+)%""").find(value.name.string)?.let {
                 val newStability = it.groups[1]?.value?.parseFormattedInt() ?: return@forEach

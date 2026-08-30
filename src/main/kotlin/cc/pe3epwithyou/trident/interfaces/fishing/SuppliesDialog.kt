@@ -24,6 +24,7 @@ import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.layouts.GridLayout
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 
 // TODO: Rewrite this dialog to be much cleaner
 class SuppliesDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
@@ -74,7 +75,7 @@ class SuppliesDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
                 .offset(y = 1f)
                 .append(
                     Component.literal(" $baitAmount").mccFont()
-                        .withColor(if (isBaitDesynced) ChatFormatting.GOLD.color!! else supplies.bait.type.color)
+                        .withColor(if (isBaitDesynced) TextColor.GOLD.value else supplies.bait.type.color)
                 )
         StringWidget(baitComponent, mcFont).at(0, 0, settings = LayoutConstants.LEFT)
 

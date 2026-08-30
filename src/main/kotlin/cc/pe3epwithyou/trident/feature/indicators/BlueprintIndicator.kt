@@ -14,7 +14,7 @@ import kotlin.jvm.optionals.getOrNull
 object BlueprintIndicator {
     @JvmStatic
     fun checkItem(graphics: GuiGraphicsExtractor, slot: Slot) {
-        if (minecraft().screen !is ContainerScreen) return
+        if (minecraft().gui.screen() !is ContainerScreen) return
         checkLore(graphics, slot)
     }
 

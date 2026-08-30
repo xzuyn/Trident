@@ -20,7 +20,7 @@
     "accessors.AbstractContainerScreenAccessor",
     "accessors.BossHealthOverlayAccessor",
     "accessors.DebugScreenEntriesAccessor",
-    "accessors.GuiAccessor",
+    "accessors.HudAccessor",
     "accessors.InventoryScreenAccessor",
     "accessors.ScreenAccessor",
     "chat.ChatComponentMixin",

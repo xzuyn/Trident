@@ -17,6 +17,7 @@ import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 
 class WayfinderWidget(
@@ -45,10 +46,10 @@ class WayfinderWidget(
     }
 
     private val grottoLerpColors = listOf(
-        TridentColor(ChatFormatting.GREEN.color!!),
-        TridentColor(ChatFormatting.YELLOW.color!!),
+        TridentColor(TextColor.GREEN.value),
+        TridentColor(TextColor.YELLOW.value),
         TridentColor(0xFFA500),
-        TridentColor(ChatFormatting.RED.color!!),
+        TridentColor(TextColor.RED.value),
     )
 
     override val layout = GridLayout(themed.theme.dimensions.paddingInner) {
