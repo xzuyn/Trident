@@ -37,7 +37,7 @@ object CraftableIndicator {
     }
 
     fun fusion(graphics: GuiGraphicsExtractor, slot: Slot) {
-        val screen = (minecraft().screen as? ContainerScreen) ?: return
+        val screen = (minecraft().gui.screen() as? ContainerScreen) ?: return
         withContainerCtx(screen) {
             requireTitle("FUSION FORGE")
             slot.item.findInLore(Regex(""". > Click to Forge \(Missing materials\)"""))?.let {

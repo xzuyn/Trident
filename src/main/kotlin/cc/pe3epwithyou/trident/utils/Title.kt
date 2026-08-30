@@ -11,9 +11,9 @@ object Title {
         fadeOut: Int,
         resetTime: Boolean = true
     ) {
-        minecraft().gui.setTimes(fadeIn, stay, fadeOut)
-        minecraft().gui.setSubtitle(subtitle)
-        minecraft().gui.setTitle(title)
-        if (resetTime) minecraft().gui.resetTitleTimes()
+        minecraft().gui.hud.setTimes(fadeIn, stay, fadeOut)
+        minecraft().gui.hud.setSubtitle(subtitle)
+        minecraft().gui.hud.setTitle(title)
+        if (resetTime) minecraft().gui.hud.resetTitleTimes()
     }
 }

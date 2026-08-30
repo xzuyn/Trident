@@ -22,6 +22,7 @@ import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.layouts.GridLayout
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 
 class QuestingDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
     Themed by TridentThemed {
@@ -76,7 +77,7 @@ class QuestingDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
             ).atBottom(0, settings = LayoutConstants.CENTRE)
             StringWidget(
                 Component.literal("Not in a game".uppercase()).mccFont()
-                    .withColor(ChatFormatting.GRAY.color!!), font
+                    .withColor(TextColor.GRAY.value), font
             ).atBottom(0, settings = LayoutConstants.LEFT)
             return@grid
         }

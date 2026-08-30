@@ -25,7 +25,7 @@ object Introduction {
             original.call()
             return
         }
-        minecraft().setScreen(IntroductionScreen(original))
+        minecraft().gui.setScreen(IntroductionScreen(original))
     }
 
     fun finishIntroduction(original: Operation<Void>) {
@@ -71,7 +71,7 @@ object Introduction {
                 Button.builder(
                     Component.literal("Open Trident's Config")
                 ) { _ ->
-                    minecraft().setScreen(Config.getScreen(this@IntroductionScreen))
+                    minecraft().gui.setScreen(Config.getScreen(this@IntroductionScreen))
                 }.width(200).build().atBottom(0)
             }
 

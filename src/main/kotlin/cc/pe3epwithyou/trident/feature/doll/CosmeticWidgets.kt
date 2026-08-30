@@ -25,7 +25,7 @@ class CosmeticWidgets(x: Int, y: Int) : CompoundWidget(x, y, 0, 0) {
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, i: Int, j: Int, f: Float) {
-        val screen = minecraft().screen ?: return
+        val screen = minecraft().gui.screen() ?: return
         if (!Doll.shouldRender(screen)) return
         super.extractWidgetRenderState(graphics, i, j, f)
     }

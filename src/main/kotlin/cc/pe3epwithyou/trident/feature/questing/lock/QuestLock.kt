@@ -75,7 +75,7 @@ object QuestLock {
     fun modifyTooltip(consumer: Consumer<Component>) {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Global.questLock) return
-        val screen = minecraft().screen as? ContainerScreen ?: return
+        val screen = minecraft().gui.screen() as? ContainerScreen ?: return
         val slot = (screen as AbstractContainerScreenAccessor).hoveredSlot ?: return
         if (slot.index !in questContainers.keys) return
         if (!slot.item.hoverName.string.contains("Quest", ignoreCase = true)) return
@@ -105,7 +105,7 @@ object QuestLock {
     fun renderLock(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (!MCCIState.isOnIsland()) return
         if (!Config.Global.questLock) return
-        val screen = minecraft().screen ?: return
+        val screen = minecraft().gui.screen() ?: return
         if ("ISLAND REWARDS" !in screen.title.string) return
         if ("Quest" !in slot.item.hoverName.string) return
 

@@ -4,7 +4,7 @@ import cc.pe3epwithyou.trident.feature.chat.dmlock.ReplyLock;
 import cc.pe3epwithyou.trident.feature.statusbar.EffectBar;
 import cc.pe3epwithyou.trident.state.MCCIState;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public abstract class GuiMixin {
     @Shadow
     @Nullable

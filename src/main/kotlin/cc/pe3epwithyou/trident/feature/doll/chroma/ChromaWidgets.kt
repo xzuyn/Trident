@@ -33,7 +33,7 @@ class ChromaWidgets(x: Int, y: Int) : CompoundWidget(x, y, 0, 0) {
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, i: Int, j: Int, f: Float) {
-        val screen = minecraft().screen ?: return
+        val screen = minecraft().gui.screen() ?: return
         if (!Doll.shouldRender(screen)) return
         if (ChromaManger.fetchedChromas == null) return
         val item =
@@ -80,7 +80,7 @@ class ChromaWidgets(x: Int, y: Int) : CompoundWidget(x, y, 0, 0) {
             j: Int,
             f: Float
         ) {
-            val screen = minecraft().screen ?: return
+            val screen = minecraft().gui.screen() ?: return
             if (!Doll.shouldRender(screen)) return
             val item = DollCosmetics.currentCosmetics[CosmeticType.SKIN]?.slot?.item
                 ?: return
@@ -97,7 +97,7 @@ class ChromaWidgets(x: Int, y: Int) : CompoundWidget(x, y, 0, 0) {
         }
 
         override fun onClick(mouseButtonEvent: MouseButtonEvent, bl: Boolean) {
-            val screen = minecraft().screen ?: return
+            val screen = minecraft().gui.screen() ?: return
             if (!Doll.shouldRender(screen)) return
             val item = DollCosmetics.currentCosmetics[CosmeticType.SKIN]?.slot?.item
                 ?: return
@@ -111,7 +111,7 @@ class ChromaWidgets(x: Int, y: Int) : CompoundWidget(x, y, 0, 0) {
         }
 
         override fun playDownSound(soundManager: SoundManager) {
-            val screen = minecraft().screen ?: return
+            val screen = minecraft().gui.screen() ?: return
             if (!Doll.shouldRender(screen)) return
             val item = DollCosmetics.currentCosmetics[CosmeticType.SKIN]?.slot?.item
                 ?: return

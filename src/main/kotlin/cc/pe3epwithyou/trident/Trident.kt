@@ -121,7 +121,7 @@ class Trident : ModInitializer {
             if (!MCCIState.isOnIsland()) return@EndTick
             if (client.player == null) return@EndTick
             if (settingsKeymapping.consumeClick()) {
-                client.setScreen(Config.getScreen(client.screen))
+                client.gui.setScreen(Config.getScreen(client.gui.screen()))
             }
             if (refreshDialogsKeymapping?.consumeClick() ?: false) {
                 DialogCollection.refreshOpenedDialogs()

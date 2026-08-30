@@ -2,7 +2,7 @@ package cc.pe3epwithyou.trident.feature.statusbar
 
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.discord.EventActivity
-import cc.pe3epwithyou.trident.mixin.accessors.GuiAccessor
+import cc.pe3epwithyou.trident.mixin.accessors.HudAccessor
 import cc.pe3epwithyou.trident.state.FontCollection
 import cc.pe3epwithyou.trident.state.Game
 import cc.pe3epwithyou.trident.state.MCCIState
@@ -129,7 +129,7 @@ object EffectBar {
     }
 
     private fun checkEliminationBanner(): Boolean {
-        val actionBar = (minecraft().gui as GuiAccessor).overlayMessageString ?: return false
+        val actionBar = (minecraft().gui.hud as HudAccessor).overlayMessageString ?: return false
         val strings = listOf("ELIMINATION", "RAMPAGE", "SPECTATING")
         return strings.any { actionBar.string.contains(it, ignoreCase = true) }
     }

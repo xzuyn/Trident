@@ -27,7 +27,7 @@ import cc.pe3epwithyou.trident.interfaces.killfeed.widgets.KillWidget
 import cc.pe3epwithyou.trident.interfaces.questing.QuestingDialog
 import cc.pe3epwithyou.trident.interfaces.updatechecker.DisappointedCatDialog
 import cc.pe3epwithyou.trident.mixin.accessors.BossHealthOverlayAccessor
-import cc.pe3epwithyou.trident.mixin.accessors.GuiAccessor
+import cc.pe3epwithyou.trident.mixin.accessors.HudAccessor
 import cc.pe3epwithyou.trident.state.*
 import cc.pe3epwithyou.trident.state.fishing.Augment
 import cc.pe3epwithyou.trident.state.fishing.AugmentStatus
@@ -491,16 +491,16 @@ object TridentCommand {
             literal("get_accessor_value") {
                 literal("gui") {
                     executes {
-                        val gui = minecraft().gui as GuiAccessor
-                        Logger.sendMessage("Actionbar: ${gui.overlayMessageString?.string}")
-                        Logger.sendMessage(gui.overlayMessageString ?: Component.empty())
-                        Logger.sendMessage("Title: ${gui.title}")
+                        val hud = minecraft().gui.hud as HudAccessor
+                        Logger.sendMessage("Actionbar: ${hud.overlayMessageString?.string}")
+                        Logger.sendMessage(hud.overlayMessageString ?: Component.empty())
+                        Logger.sendMessage("Title: ${hud.title}")
                     }
                 }
                 literal("bosshealthoverlay") {
                     executes {
                         val events =
-                            (minecraft().gui.bossOverlay as BossHealthOverlayAccessor).events
+                            (minecraft().gui.hud.bossOverlay as BossHealthOverlayAccessor).events
                         events.forEach { (uUID, event) ->
                             Logger.sendMessage("Event UUID: $uUID, Event: ${event.name.string}")
                         }

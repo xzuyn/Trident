@@ -64,8 +64,7 @@ object ChatEventListener {
                 Regex("""You are now in the .+ chat.""").find(message.string)?.let {
                     if (ReplyLock.getReplyLockUser() != null) {
                         ReplyLock.disableLock()
-                        minecraft()
-                            .setScreen(minecraft().screen)
+                        minecraft().gui.setScreen(minecraft().gui.screen())
                     }
                 }
 

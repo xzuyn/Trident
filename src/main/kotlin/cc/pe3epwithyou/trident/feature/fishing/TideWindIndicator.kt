@@ -14,7 +14,7 @@ object TideWindIndicator {
     fun renderOutline(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (!Config.Fishing.islandIndicators) return
         val client = minecraft()
-        val screen = client.screen ?: return
+        val screen = client.gui.screen() ?: return
         if ("FISHING ISLANDS" !in screen.title.string) return
         val item = slot.item
         item.getLore().forEach { l ->
@@ -28,7 +28,7 @@ object TideWindIndicator {
     fun render(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (!Config.Fishing.islandIndicators) return
         val client = minecraft()
-        val screen = client.screen ?: return
+        val screen = client.gui.screen() ?: return
         if ("FISHING ISLANDS" !in screen.title.string) return
         val item = slot.item
         item.getLore().forEach { l ->

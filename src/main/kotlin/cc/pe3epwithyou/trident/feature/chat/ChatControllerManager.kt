@@ -52,9 +52,9 @@ object ChatControllerManager {
      */
     fun refreshChatScreen() {
         val client = minecraft()
-        val screen = client.screen
+        val screen = client.gui.screen()
         if (screen is ChatScreen) {
-            client.setScreen(screen)
+            client.gui.setScreen(screen)
         }
     }
 }
