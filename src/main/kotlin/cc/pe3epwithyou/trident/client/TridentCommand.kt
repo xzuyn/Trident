@@ -12,6 +12,7 @@ import cc.pe3epwithyou.trident.feature.crafting.CraftingNotifications
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.discord.IPCManager
 import cc.pe3epwithyou.trident.feature.disguise.Disguise
+import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.exchange.ExchangeHandler
 import cc.pe3epwithyou.trident.feature.fishing.OverclockHandlers
 import cc.pe3epwithyou.trident.feature.killfeed.KillMethod
@@ -101,6 +102,21 @@ object TridentCommand {
                         val key = it.getArgument("dialog", String::class.java)
                         DialogCollection.close(key)
                     }
+                }
+            }
+
+            /**
+             * Clears all saved Parkour Warrior: Dojo split times
+             */
+            literal("cleardojosplits") {
+                executes {
+                    DojoSplitManager.clearSplits()
+
+                    val c = Component.literal("Your Dojo splits have been successfully ")
+                        .withSwatch(TridentFont.TRIDENT_COLOR).append(
+                            Component.literal("cleared").withSwatch(TridentFont.ERROR)
+                        )
+                    Logger.sendMessage(c)
                 }
             }
 

@@ -4,6 +4,7 @@ import cc.pe3epwithyou.trident.client.listeners.ChatEventListener
 import cc.pe3epwithyou.trident.client.listeners.KillChatListener
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
+import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.friends.FriendsInServer
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
 import cc.pe3epwithyou.trident.feature.questing.GameQuests
@@ -117,6 +118,7 @@ object NoxesiumUtils {
             if (currentGame != MCCIState.game) {
                 MCCIState.game = currentGame
                 Logger.debugLog("Current game: ${MCCIState.game.title}")
+                if (currentGame != Game.PARKOUR_WARRIOR_DOJO) DojoSplitTimer.setInstance(null)
             }
 
             ActivityManager.updateCurrentActivity()

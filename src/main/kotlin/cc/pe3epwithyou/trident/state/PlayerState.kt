@@ -130,6 +130,22 @@ data class CraftingNotifications(
 )
 
 @Serializable
+data class DojoSplit(var best: Long, var avg: Double, var count: Int = 1) {
+    fun addTime(time: Long): DojoSplit {
+        val newCount = count + 1
+        val newAvg = avg + (time - avg) / newCount
+        val newBest = if (time < best) time else best
+        return DojoSplit(newBest, newAvg, newCount)
+    }
+}
+
+@Serializable
+data class DojoCourseSplits(
+    var levels: MutableMap<String, DojoSplit> = mutableMapOf(),
+    var levelNames: MutableMap<String, String> = mutableMapOf()
+)
+
+@Serializable
 data class PlayerState(
     var supplies: Supplies = Supplies(),
     var wayfinderData: WayfinderData = WayfinderData(),
@@ -139,6 +155,7 @@ data class PlayerState(
     var levelData: CrownLevel? = null,
     var craftingNotifications: CraftingNotifications = CraftingNotifications(),
     var activeChatrooms: MutableList<Chatrooms.Chatroom> = mutableListOf(),
+    var dojoSplits: MutableMap<String, DojoCourseSplits> = mutableMapOf(),
 )
 
 object PlayerStateIO {

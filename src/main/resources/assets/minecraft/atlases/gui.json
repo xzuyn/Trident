@@ -7,6 +7,18 @@
     {
       "type": "single",
       "resource": "trident:killfeed/right"
+    },
+    {
+      "type": "single",
+      "resource": "trident:dojo/pkw_splits"
+    },
+    {
+      "type": "single",
+      "resource": "trident:dojo/split_up"
+    },
+    {
+      "type": "single",
+      "resource": "trident:dojo/split_down"
     }
   ]
 }

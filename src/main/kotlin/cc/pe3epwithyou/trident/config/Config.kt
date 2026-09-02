@@ -3,6 +3,7 @@ package cc.pe3epwithyou.trident.config
 import cc.pe3epwithyou.trident.config.groups.*
 import cc.pe3epwithyou.trident.feature.api.ApiProvider
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
+import cc.pe3epwithyou.trident.feature.dojo.DojoSplitType
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedPosition
 import cc.pe3epwithyou.trident.feature.rarityslot.DisplayType
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
@@ -123,6 +124,25 @@ class Config {
 
     @SerialEntry
     var gamesAutoFocus: Boolean = false
+
+
+    @SerialEntry
+    var dojoEnabled: Boolean = true
+
+    @SerialEntry
+    var dojoSendSplitTime: Boolean = true
+
+    @SerialEntry
+    var dojoShowTimer: Boolean = true
+
+    @SerialEntry
+    var dojoShowSplitImprovements: Boolean = true
+
+    @SerialEntry
+    var dojoShowTimerImprovementAt: Int = -3
+
+    @SerialEntry
+    var dojoSaveMode: DojoSplitType = DojoSplitType.BEST
 
 
     @SerialEntry
@@ -269,6 +289,21 @@ class Config {
             get() = handler.instance().gamesAutoFocus
     }
 
+    object Dojo {
+        val enabled: Boolean
+            get() = handler.instance().dojoEnabled
+        val sendSplitTime: Boolean
+            get() = handler.instance().dojoSendSplitTime
+        val showTimer: Boolean
+            get() = handler.instance().dojoShowTimer
+        val showSplitImprovements: Boolean
+            get() = handler.instance().dojoShowSplitImprovements
+        val showTimerImprovementAt: Int
+            get() = handler.instance().dojoShowTimerImprovementAt
+        val saveMode: DojoSplitType
+            get() = handler.instance().dojoSaveMode
+    }
+
     object KillFeed {
         val enabled: Boolean
             get() = handler.instance().killfeedEnabled
@@ -374,6 +409,7 @@ class Config {
             killfeedCategory(categories)
             questingCategory(categories)
             fishingCategory(categories)
+            dojoCategory(categories)
             debugCategory(categories)
 
 
