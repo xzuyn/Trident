@@ -1,9 +1,12 @@
 package cc.pe3epwithyou.trident.mixin;
 
 import cc.pe3epwithyou.trident.feature.chat.dmlock.ReplyLock;
+import cc.pe3epwithyou.trident.feature.dojo.DojoSplitBar;
 import cc.pe3epwithyou.trident.feature.statusbar.EffectBar;
+import cc.pe3epwithyou.trident.mixin.accessors.BossHealthOverlayAccessor;
 import cc.pe3epwithyou.trident.state.MCCIState;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Player;
@@ -26,5 +29,9 @@ public abstract class GuiMixin {
         if (getCameraPlayer() == null) return;
         ReplyLock.Icon.renderIcon(guiGraphics, getCameraPlayer());
         EffectBar.render(guiGraphics);
+
+        int bossBars = ((BossHealthOverlayAccessor) Minecraft.getInstance().gui.hud.bossOverlay).getEvents().size();
+        DojoSplitBar.render(guiGraphics, bossBars);
     }
 }
+
