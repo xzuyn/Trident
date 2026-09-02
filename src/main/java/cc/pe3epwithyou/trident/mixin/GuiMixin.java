@@ -30,7 +30,7 @@ public abstract class GuiMixin {
         ReplyLock.Icon.renderIcon(guiGraphics, getCameraPlayer());
         EffectBar.render(guiGraphics);
 
-        int bossBars = ((BossHealthOverlayAccessor) Minecraft.getInstance().gui.hud.bossOverlay).getEvents().size();
+        int bossBars = ((BossHealthOverlayAccessor) Minecraft.getInstance().gui.hud.getBossOverlay()).getEvents().size();
         DojoSplitBar.render(guiGraphics, bossBars);
     }
 }
