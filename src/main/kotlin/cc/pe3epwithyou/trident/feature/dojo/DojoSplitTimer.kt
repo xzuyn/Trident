@@ -71,7 +71,7 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
         if (Config.Dojo.showSplitImprovements) {
             modified = modified.append(splitImprovementComponent())
         }
-        minecraft().gui.setSubtitle(modified)
+        minecraft().gui.hud.setSubtitle(modified)
         ci.cancel()
 
         saveSplit()
