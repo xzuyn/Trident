@@ -19,7 +19,7 @@ public abstract class OnlineServerEntryMixin {
     public abstract ServerData getServerData();
 
     @WrapMethod(method = "join")
-    private void wrapJoin(Operation<Void> original) {
+    private void trident$join(Operation<Void> original) {
         try {
             ServerData serverData = getServerData();
             if (!serverData.ip.toLowerCase().contains("mccisland.net")) {
@@ -33,8 +33,8 @@ public abstract class OnlineServerEntryMixin {
     }
 
     @Inject(method = "extractContent", at = @At("HEAD"))
-    void injectRenderContent(GuiGraphicsExtractor guiGraphics, int i, int j, boolean bl, float f, CallbackInfo ci) {
+    void trident$extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float a, CallbackInfo ci) {
         ServerSelectionList.OnlineServerEntry thisEntry = (ServerSelectionList.OnlineServerEntry) (Object) this;
-        CraftingNotifications.renderServerListIndicator(guiGraphics, i, j, thisEntry.getContentX(), thisEntry.getContentY(), getServerData());
+        CraftingNotifications.renderServerListIndicator(graphics, mouseX, mouseY, thisEntry.getContentX(), thisEntry.getContentY(), getServerData());
     }
 }

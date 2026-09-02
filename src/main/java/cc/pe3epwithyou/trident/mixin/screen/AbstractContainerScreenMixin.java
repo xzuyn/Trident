@@ -51,38 +51,38 @@ public class AbstractContainerScreenMixin extends Screen {
     }
 
     @Inject(method = "extractSlot", at = @At(value = "HEAD"))
-    public void injectRenderSlotHead(GuiGraphicsExtractor guiGraphics, Slot slot, int i, int j, CallbackInfo ci) {
+    public void trident$extractSlotHead(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
-        RaritySlot.INSTANCE.render(guiGraphics, slot);
-        TideWindIndicator.INSTANCE.renderOutline(guiGraphics, slot);
+        RaritySlot.INSTANCE.render(graphics, slot);
+        TideWindIndicator.INSTANCE.renderOutline(graphics, slot);
     }
 
     @Inject(method = "extractSlot", at = @At(value = "TAIL"))
-    public void injectRenderSlotTail(GuiGraphicsExtractor guiGraphics, Slot slot, int i, int j, CallbackInfo ci) {
+    public void trident$extractSlotTail(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         if (Config.Global.INSTANCE.getBlueprintIndicators()) {
-            BlueprintIndicator.checkItem(guiGraphics, slot);
+            BlueprintIndicator.checkItem(graphics, slot);
         }
         if (Config.Debug.INSTANCE.getDrawSlotNumber()) {
-            DebugDraw.INSTANCE.renderSlotNumber(guiGraphics, slot);
+            DebugDraw.INSTANCE.renderSlotNumber(graphics, slot);
         }
         if (Config.Global.INSTANCE.getUpgradeIndicators()) {
-            UpgradeIndicator.INSTANCE.render(guiGraphics, slot);
+            UpgradeIndicator.INSTANCE.render(graphics, slot);
         }
-        TideWindIndicator.INSTANCE.render(guiGraphics, slot);
-        CraftableIndicator.INSTANCE.render(guiGraphics, slot);
+        TideWindIndicator.INSTANCE.render(graphics, slot);
+        CraftableIndicator.INSTANCE.render(graphics, slot);
         if (Config.Global.INSTANCE.getExchangeImprovements()) {
-            ExchangeHandler.INSTANCE.renderSlot(guiGraphics, slot);
+            ExchangeHandler.INSTANCE.renderSlot(graphics, slot);
         }
-        AugmentStatusInterface.render(guiGraphics, slot);
-        QuestLock.renderLock(guiGraphics, slot);
-        Doll.renderSlot(guiGraphics, slot);
-        Chatrooms.renderPinIcon(guiGraphics, slot);
-        EnhancedCompactInfinibag.render(guiGraphics, slot);
+        AugmentStatusInterface.render(graphics, slot);
+        QuestLock.renderLock(graphics, slot);
+        Doll.renderSlot(graphics, slot);
+        Chatrooms.renderPinIcon(graphics, slot);
+        EnhancedCompactInfinibag.render(graphics, slot);
     }
 
     @Inject(method = "onClose", at = @At(value = "HEAD"))
-    public void injectOnClose(CallbackInfo ci) {
+    public void trident$onClose(CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         if (minecraft.gui.screen() instanceof ContainerScreen s) {
             ContainerEvents.INSTANCE.getCLOSE().invoker().invoke(new ContainerContext(s));
@@ -90,7 +90,7 @@ public class AbstractContainerScreenMixin extends Screen {
     }
 
     @Inject(method = "extractTooltip", at = @At("HEAD"), cancellable = true)
-    public void injectRenderTooltip(GuiGraphicsExtractor guiGraphics, int i, int j, CallbackInfo ci) {
+    public void trident$extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
             if (!ExchangeHandler.INSTANCE.shouldRenderTooltip(hoveredSlot)) ci.cancel();
@@ -98,17 +98,17 @@ public class AbstractContainerScreenMixin extends Screen {
     }
 
     @Inject(method = "extractContents", at = @At(value = "TAIL"))
-    public void injectRenderBackground(GuiGraphicsExtractor guiGraphics, int i, int j, float f, CallbackInfo ci) {
+    public void trident$extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         if (minecraft.gui.screen() instanceof ContainerScreen s) {
             if (s.getTitle().getString().contains("ISLAND EXCHANGE")) {
-                ExchangeHandler.INSTANCE.renderBackground(guiGraphics, leftPos, topPos);
+                ExchangeHandler.INSTANCE.renderBackground(graphics, leftPos, topPos);
             }
         }
     }
 
     @Inject(method = "init", at = @At("TAIL"))
-    public void init(CallbackInfo ci) {
+    public void trident$init(CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         String screenTitle = this.getTitle().getString();
         if (minecraft.gui.screen() instanceof ContainerScreen screen) {
@@ -122,24 +122,24 @@ public class AbstractContainerScreenMixin extends Screen {
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    public void injectMouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl, CallbackInfoReturnable<Boolean> cir) {
+    public void trident$mouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
         ContainerScreen containerScreen = minecraft.gui.screen() instanceof ContainerScreen s ? s : null;
         if (containerScreen == null) return;
-        ClickEvents.INSTANCE.getCLICK().invoker().invoke(new ContainerClickContext(bl, containerScreen, mouseButtonEvent, cir));
+        ClickEvents.INSTANCE.getCLICK().invoker().invoke(new ContainerClickContext(doubleClick, containerScreen, event, cir));
     }
 
     @Inject(method = "extractContents", at = @At("HEAD"))
-    public void injectRender(GuiGraphicsExtractor guiGraphics, int i, int j, float f, CallbackInfo ci) {
-        Doll.render(guiGraphics);
+    public void trident$extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
+        Doll.render(graphics);
     }
 
     @Inject(method = "mouseDragged", at = @At("HEAD"))
-    public void injectMouseDragged(MouseButtonEvent mouseButtonEvent, double d, double e, CallbackInfoReturnable<Boolean> cir) {
-        Doll.rotateDoll((float) e, (float) d);
+    public void trident$mouseDragged(MouseButtonEvent event, double dx, double dy, CallbackInfoReturnable<Boolean> cir) {
+        Doll.rotateDoll((float) dy, (float) dx);
     }
 
     @Inject(method = "mouseReleased", at = @At("HEAD"))
-    public void injectMouseReleased(MouseButtonEvent mouseButtonEvent, CallbackInfoReturnable<Boolean> cir) {
+    public void trident$mouseReleased(MouseButtonEvent event, CallbackInfoReturnable<Boolean> cir) {
         Doll.onReleased();
     }
 

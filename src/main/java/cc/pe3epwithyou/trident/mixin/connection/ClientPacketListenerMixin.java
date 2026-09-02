@@ -17,20 +17,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerMixin {
     @Inject(method = "setSubtitleText", at = @At("TAIL"))
-    private void injectSetSubtitleText(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket, CallbackInfo ci) {
+    private void trident$setSubtitleText(ClientboundSetSubtitleTextPacket packet, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
-        FocusGame.INSTANCE.handleSubtitle(clientboundSetSubtitleTextPacket.text().getString());
+        FocusGame.INSTANCE.handleSubtitle(packet.text().getString());
     }
 
     @Inject(method = "handleContainerSetSlot", at = @At("TAIL"))
-    private void injectHandleContainerSetSlot(ClientboundContainerSetSlotPacket clientboundContainerSetSlotPacket, CallbackInfo ci) {
+    private void trident$handleContainerSetSlot(ClientboundContainerSetSlotPacket packet, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
-        QuestListener.INSTANCE.handleRefreshTasksItem(clientboundContainerSetSlotPacket.getItem());
+        QuestListener.INSTANCE.handleRefreshTasksItem(packet.getItem());
         ScreenManager.setWaiting(false);
     }
 
     @Inject(method = "handleBossUpdate", at = @At("TAIL"))
-    private void injectHandleBossUpdate(ClientboundBossEventPacket clientboundBossEventPacket, CallbackInfo ci) {
+    private void trident$handleBossUpdate(ClientboundBossEventPacket packet, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         WayfinderModule.INSTANCE.handleBossbarEvent();
     }

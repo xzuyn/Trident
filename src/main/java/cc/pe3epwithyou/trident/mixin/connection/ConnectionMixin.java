@@ -27,7 +27,7 @@ public abstract class ConnectionMixin {
     private volatile @Nullable PacketListener packetListener;
 
     @Inject(method = "disconnect(Lnet/minecraft/network/chat/Component;)V", at = @At("TAIL"))
-    private void injectDisconnect(Component component, CallbackInfo ci) {
+    private void trident$disconnect(Component reason, CallbackInfo ci) {
         SocketAddress remoteAddress = getRemoteAddress();
         if (remoteAddress == null) return;
         if (remoteAddress instanceof InetSocketAddress inetSocketAddress) {
@@ -41,7 +41,7 @@ public abstract class ConnectionMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V", cancellable = true)
-    public void injectChannelRead(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
+    public void trident$channelRead(ChannelHandlerContext ctx, Packet<?> packet, CallbackInfo ci) {
         PacketHandler.handle(packet, ci);
     }
 }

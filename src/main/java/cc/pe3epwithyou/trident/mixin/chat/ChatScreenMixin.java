@@ -17,7 +17,7 @@ public abstract class ChatScreenMixin extends Screen {
     }
 
     @Inject(method = "init", at = @At("TAIL"))
-    public void init(CallbackInfo ci) {
+    public void trident$init(CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         this.addRenderableWidget(new ChatDecorations.Widget());
     }
