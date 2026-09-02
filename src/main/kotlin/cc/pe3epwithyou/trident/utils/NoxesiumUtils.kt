@@ -4,6 +4,7 @@ import cc.pe3epwithyou.trident.client.listeners.ChatEventListener
 import cc.pe3epwithyou.trident.client.listeners.KillChatListener
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
+import cc.pe3epwithyou.trident.feature.dojo.DOJO_SPLITS_DIALOG_KEY
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.friends.FriendsInServer
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
@@ -11,6 +12,7 @@ import cc.pe3epwithyou.trident.feature.questing.GameQuests
 import cc.pe3epwithyou.trident.feature.questing.IncrementContext
 import cc.pe3epwithyou.trident.feature.questing.QuestStorage
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
+import cc.pe3epwithyou.trident.interfaces.dojo.DojoSplitsDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.SuppliesDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.WayfinderDialog
 import cc.pe3epwithyou.trident.interfaces.killfeed.KillFeedDialog
@@ -55,6 +57,10 @@ object NoxesiumUtils {
         if (KillChatListener.killfeedGames.contains(currentGame) && Config.KillFeed.enabled) {
             val k = "killfeed"
             DialogCollection.open(k, KillFeedDialog(10, 10, k))
+        }
+        if (currentGame == Game.PARKOUR_WARRIOR_DOJO && Config.Dojo.enabled && Config.Dojo.showTimer) {
+            val k = DOJO_SPLITS_DIALOG_KEY
+            DialogCollection.open(k, DojoSplitsDialog(10, 10, k))
         }
         if (currentGame != Game.FISHING) {
             if (!Config.Questing.enabled) return

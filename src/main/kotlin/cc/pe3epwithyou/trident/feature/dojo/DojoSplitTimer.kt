@@ -1,6 +1,7 @@
 package cc.pe3epwithyou.trident.feature.dojo
 
 import cc.pe3epwithyou.trident.config.Config
+import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.state.FontCollection
 import cc.pe3epwithyou.trident.state.Game
 import cc.pe3epwithyou.trident.state.MCCIState
@@ -18,9 +19,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import java.util.regex.Pattern
 
 /**
+ * Key the [cc.pe3epwithyou.trident.interfaces.dojo.DojoSplitsDialog] is opened/refreshed under.
+ */
+const val DOJO_SPLITS_DIALOG_KEY = "dojo_splits"
+
+/**
  * One completed level in the current Dojo run, kept for the LiveSplit-style split list.
  */
-data class DojoSplitRow(val levelName: String, val timeSeconds: Double, val deltaSeconds: Double?)
+data class DojoSplitRow(
+    val levelUid: String,
+    val levelName: String,
+    val timeSeconds: Double,
+    val deltaSeconds: Double?
+)
 
 /**
  * Tracks split times for a single Parkour Warrior: Dojo run.
@@ -29,12 +40,15 @@ data class DojoSplitRow(val levelName: String, val timeSeconds: Double, val delt
  * round ends, the course restarts, or the player leaves the game. Ported from IslandUtils'
  * `LevelTimer`.
  */
-class DojoSplitTimer private constructor(private val courseName: String?) {
+class DojoSplitTimer private constructor(val courseName: String?) {
     private var lastSplitTimestamp: Long = System.currentTimeMillis()
+    private val runStartTimestamp: Long = System.currentTimeMillis()
 
     var levelName: String = "M1-1"
         private set
-    private var levelUid: String = ""
+
+    var currentLevelUid: String = ""
+        private set
 
     /** Whether the player is currently between levels (not actively timing a split). */
     var isBetween: Boolean = true
@@ -70,8 +84,10 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
         val hash = StringBuilder()
         component.siblings.forEach { sibling -> sibling.style.color?.let { hash.append(it) } }
         hash.append(levelName)
-        levelUid = hash.toString()
-        Logger.debugLog("DojoSplitTimer - Detected level with id: $levelUid")
+        currentLevelUid = hash.toString()
+        Logger.debugLog("DojoSplitTimer - Detected level with id: $currentLevelUid")
+
+        DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
     }
 
     private fun modifyMedalTitle(component: Component, ci: CallbackInfo) {
@@ -89,13 +105,15 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
 
     fun saveSplit() {
         val course = courseName ?: return
+        val finishedUid = currentLevelUid
         val finishedName = levelName
         val finishedTime = currentSplitTimeSeconds()
         val delta = if (Config.Dojo.showSplitImprovements) splitImprovement() else null
-        completedSplits.add(DojoSplitRow(finishedName, finishedTime, delta))
+        completedSplits.add(DojoSplitRow(finishedUid, finishedName, finishedTime, delta))
 
         sendSplitCompleteMessage()
-        DojoSplitManager.saveSplit(course, levelUid, levelName, currentSplitTimeMillis())
+        DojoSplitManager.saveSplit(course, finishedUid, finishedName, currentSplitTimeMillis())
+        DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
     }
 
     private fun sendSplitCompleteMessage() {
@@ -151,10 +169,11 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
 
     fun currentSplitTimeMillis(): Long = System.currentTimeMillis() - lastSplitTimestamp
     fun currentSplitTimeSeconds(): Double = currentSplitTimeMillis() / 1000.0
+    fun totalElapsedSeconds(): Double = (System.currentTimeMillis() - runStartTimestamp) / 1000.0
 
     fun splitImprovement(): Double? {
         val course = courseName ?: return null
-        val split = DojoSplitManager.getSplitSeconds(course, levelUid) ?: return null
+        val split = DojoSplitManager.getSplitSeconds(course, currentLevelUid) ?: return null
         return currentSplitTimeSeconds() - split
     }
 
@@ -167,6 +186,7 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
 
         fun setInstance(timer: DojoSplitTimer?) {
             instance = timer
+            DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
         }
 
         @JvmStatic
@@ -189,6 +209,7 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
                 val courseName = if (MCCIState.game == Game.PARKOUR_WARRIOR_DOJO) {
                     ScoreboardUtils.findInScoreboard(COURSE_NAME_PATTERN)?.groupValues?.getOrNull(1)
                 } else null
+                if (courseName != null) DojoSplitManager.lastCourseName = courseName
                 setInstance(DojoSplitTimer(courseName))
                 Logger.debugLog("DojoSplitTimer - Started timer!")
             }

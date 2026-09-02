@@ -8,6 +8,9 @@ import cc.pe3epwithyou.trident.utils.Logger
 import cc.pe3epwithyou.trident.utils.playerState
 
 object DojoSplitManager {
+    /** The most recently attempted course this session, so the splits dialog has something to show between runs. */
+    var lastCourseName: String? = null
+
     /**
      * Gets (or creates) the [DojoCourseSplits] for a course, keyed off its display name.
      *
