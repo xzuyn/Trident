@@ -3,27 +3,35 @@ package cc.pe3epwithyou.trident.feature.dojo
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.state.MCCIState
 import cc.pe3epwithyou.trident.utils.Resources
+import cc.pe3epwithyou.trident.utils.extensions.GraphicsExtensions.fillRoundedAll
 import cc.pe3epwithyou.trident.utils.minecraft
 import com.noxcrew.sheeplib.util.opaqueColor
+import com.noxcrew.sheeplib.util.opacity
 import net.minecraft.ChatFormatting
-import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.Font
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.FontDescription
-import net.minecraft.client.renderer.RenderPipelines
-import net.minecraft.resources.Identifier
+import net.minecraft.network.chat.Style
 
 /**
- * Renders the live split timer bar under the boss bars while a Dojo run is active.
- * Ported from IslandUtils' `DojoSplitUI`.
+ * Renders a LiveSplit-style box under the boss bars while a Dojo run is active: every level
+ * completed so far this run gets its own row (name, split time, colored delta), with the
+ * level currently being run shown as a live-ticking final row.
  */
 object DojoSplitBar {
-    private val BAR_TEXTURE: Identifier = Resources.trident("dojo/pkw_splits")
     private val HUD_STYLE: Style = Style.EMPTY.withFont(FontDescription.Resource(Resources.mcc("hud")))
     private const val WIDTH = 130
-    private const val HEIGHT = 12
-    private const val LEVEL_NAME_WIDTH = 25
+    private const val ROW_HEIGHT = 10
+    private const val HEADER_HEIGHT = 12
+    private const val PADDING = 2
+
+    /** Only the most recent rows are shown, like LiveSplit's scrolling split list. */
+    private const val MAX_VISIBLE_COMPLETED_ROWS = 5
+
+    private const val BACKGROUND_COLOR = 0x000000
+    private const val BACKGROUND_OPACITY = 128
+    private const val CURRENT_ROW_OPACITY = 64
 
     @JvmStatic
     fun render(graphics: GuiGraphicsExtractor, bossBars: Int) {
@@ -32,47 +40,59 @@ object DojoSplitBar {
         val timer = DojoSplitTimer.instance ?: return
 
         val font = minecraft().font
-        val x = Math.round((graphics.guiWidth() / 2.0f) - (WIDTH / 2.0f) - 1.0f)
+        val showCurrentRow = !timer.isBetween
+        val completed = timer.completedSplits.takeLast(
+            if (showCurrentRow) MAX_VISIBLE_COMPLETED_ROWS - 1 else MAX_VISIBLE_COMPLETED_ROWS
+        )
+        val rowCount = completed.size + if (showCurrentRow) 1 else 0
+        if (rowCount == 0) return
+
+        val height = HEADER_HEIGHT + rowCount * ROW_HEIGHT + PADDING
+        val x = Math.round((graphics.guiWidth() / 2.0f) - (WIDTH / 2.0f))
         val y = (bossBars * 18.5).toInt() + 1
 
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_TEXTURE, x, y, WIDTH, HEIGHT)
+        graphics.fillRoundedAll(x, y, WIDTH, height, BACKGROUND_COLOR opacity BACKGROUND_OPACITY)
 
-        renderLevelName(graphics, font, timer, x, y)
-        val timerWidth = renderSplitTime(graphics, font, timer, x, y)
-        if (Config.Dojo.showSplitImprovements) {
-            renderSplitImprovement(graphics, font, timer, x, y, timerWidth)
+        val title = Component.literal("SPLITS").withStyle(HUD_STYLE).withStyle(ChatFormatting.GRAY)
+        graphics.text(font, title, x + PADDING + 1, y + 2, 0xFFFFFF.opaqueColor())
+
+        var rowY = y + HEADER_HEIGHT
+        completed.forEach { row ->
+            renderRow(graphics, font, x, rowY, row.levelName, row.timeSeconds, row.deltaSeconds, live = false)
+            rowY += ROW_HEIGHT
+        }
+
+        if (showCurrentRow) {
+            graphics.fillRoundedAll(x, rowY, WIDTH, ROW_HEIGHT, BACKGROUND_COLOR opacity CURRENT_ROW_OPACITY)
+            val delta = timer.splitImprovement()
+                ?.takeIf { Config.Dojo.showSplitImprovements && it >= Config.Dojo.showTimerImprovementAt }
+            renderRow(graphics, font, x, rowY, timer.levelName, timer.currentSplitTimeSeconds(), delta, live = true)
         }
     }
 
-    private fun renderLevelName(graphics: GuiGraphicsExtractor, font: Font, timer: DojoSplitTimer, x: Int, y: Int) {
-        val levelName = Component.literal(timer.levelName).withStyle(HUD_STYLE)
-        val offset = (LEVEL_NAME_WIDTH / 2) - (font.width(levelName) / 2)
-        graphics.text(font, levelName, x + offset + 1, y + 2, 0xFFFFFF.opaqueColor())
-    }
-
-    private fun renderSplitTime(graphics: GuiGraphicsExtractor, font: Font, timer: DojoSplitTimer, x: Int, y: Int): Int {
-        val splitTime = Component.literal(String.format("%.3f", timer.currentSplitTimeSeconds()))
-        val width = font.width(splitTime)
-        graphics.text(font, splitTime, x + WIDTH - width - 2, y + 2, 0xFFFFFF.opaqueColor())
-        return width
-    }
-
-    private fun renderSplitImprovement(
-        graphics: GuiGraphicsExtractor, font: Font, timer: DojoSplitTimer, x: Int, y: Int, timerWidth: Int
+    private fun renderRow(
+        graphics: GuiGraphicsExtractor,
+        font: Font,
+        x: Int,
+        y: Int,
+        levelName: String,
+        timeSeconds: Double,
+        deltaSeconds: Double?,
+        live: Boolean
     ) {
-        if (timer.isBetween) return
-        val improvement = timer.splitImprovement() ?: return
-        if (improvement < Config.Dojo.showTimerImprovementAt) return
+        val nameColor = if (live) ChatFormatting.WHITE else ChatFormatting.GRAY
+        val name = Component.literal(levelName.uppercase()).withStyle(nameColor)
+        graphics.text(font, name, x + PADDING + 1, y + 1, 0xFFFFFF.opaqueColor())
 
-        var formatted = String.format("%.2fs", improvement)
-        var color = ChatFormatting.GREEN
-        if (improvement > 0) {
-            color = ChatFormatting.RED
-            formatted = "+$formatted"
-        }
+        val time = Component.literal(String.format("%.3f", timeSeconds)).withStyle(ChatFormatting.WHITE)
+        val timeWidth = font.width(time)
+        graphics.text(font, time, x + WIDTH - timeWidth - PADDING - 1, y + 1, 0xFFFFFF.opaqueColor())
 
-        val improvementTime = Component.literal(formatted).withStyle(color)
-        val tx = x + WIDTH - timerWidth - 2 - font.width(improvementTime) - 8
-        graphics.text(font, improvementTime, tx, y + 2, 0xFFFFFF.opaqueColor())
+        if (deltaSeconds == null) return
+        val color = if (deltaSeconds > 0) ChatFormatting.RED else ChatFormatting.GREEN
+        val sign = if (deltaSeconds > 0) "+" else ""
+        val delta = Component.literal("$sign${String.format("%.2f", deltaSeconds)}").withStyle(color)
+        val deltaWidth = font.width(delta)
+        graphics.text(font, delta, x + WIDTH - timeWidth - deltaWidth - PADDING - 5, y + 1, 0xFFFFFF.opaqueColor())
     }
 }

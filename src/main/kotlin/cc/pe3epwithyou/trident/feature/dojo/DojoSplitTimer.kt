@@ -18,6 +18,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import java.util.regex.Pattern
 
 /**
+ * One completed level in the current Dojo run, kept for the LiveSplit-style split list.
+ */
+data class DojoSplitRow(val levelName: String, val timeSeconds: Double, val deltaSeconds: Double?)
+
+/**
  * Tracks split times for a single Parkour Warrior: Dojo run.
  *
  * A new instance is created every time the "go" countdown sound plays, and lives until the
@@ -34,6 +39,9 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
     /** Whether the player is currently between levels (not actively timing a split). */
     var isBetween: Boolean = true
         private set
+
+    /** Levels completed so far this run, in order, for the LiveSplit-style split list. */
+    val completedSplits: MutableList<DojoSplitRow> = mutableListOf()
 
     /**
      * Handles a subtitle packet while a Dojo run is active.
@@ -81,6 +89,11 @@ class DojoSplitTimer private constructor(private val courseName: String?) {
 
     fun saveSplit() {
         val course = courseName ?: return
+        val finishedName = levelName
+        val finishedTime = currentSplitTimeSeconds()
+        val delta = if (Config.Dojo.showSplitImprovements) splitImprovement() else null
+        completedSplits.add(DojoSplitRow(finishedName, finishedTime, delta))
+
         sendSplitCompleteMessage()
         DojoSplitManager.saveSplit(course, levelUid, levelName, currentSplitTimeMillis())
     }
