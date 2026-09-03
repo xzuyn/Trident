@@ -51,10 +51,12 @@ class DojoSplitSummaryWidget(
             }
         }
 
-        val paceSeconds = (timer?.totalElapsedSeconds() ?: 0.0) + remainingBest
-        val paceText = formatTime(paceSeconds) + (if (!remainingKnown) "+" else "")
+        val paceText = if (timer == null) "--" else {
+            val paceSeconds = timer.totalElapsedSeconds() + remainingBest
+            formatTime(paceSeconds) + (if (!remainingKnown) "+" else "")
+        }
         val paceLabel = Component.literal("CURRENT PACE ").withStyle(ChatFormatting.GRAY)
-            .append(Component.literal(paceText).withStyle(ChatFormatting.WHITE))
+            .append(Component.literal(paceText).withStyle(if (timer == null) ChatFormatting.DARK_GRAY else ChatFormatting.WHITE))
         graphics.text(font, paceLabel, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         val bestText = formatTime(totalBest) + (if (!totalKnown) "+" else "")
