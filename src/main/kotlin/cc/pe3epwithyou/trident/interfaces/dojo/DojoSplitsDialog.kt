@@ -3,9 +3,12 @@ package cc.pe3epwithyou.trident.interfaces.dojo
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.dojo.DojoEnding
 import cc.pe3epwithyou.trident.feature.dojo.DojoSection
+import cc.pe3epwithyou.trident.feature.dojo.DojoSectionGroup
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.dojo.classifyDojoSection
+import cc.pe3epwithyou.trident.feature.dojo.group
+import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitDividerWidget
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitRowWidget
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitSummaryWidget
 import cc.pe3epwithyou.trident.interfaces.shared.TridentDialog
@@ -56,6 +59,11 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         val timer = DojoSplitTimer.instance
         val courseSplits = DojoSplitManager.getCourseSplits(course)
 
+        fun nameOf(uid: String): String = courseSplits.levelNames[uid]
+            ?: timer?.completedSplits?.firstOrNull { it.levelUid == uid }?.levelName
+            ?: timer?.takeIf { it.currentLevelUid == uid }?.levelName
+            ?: "???"
+
         // Order: levels reached this run first (in order), then any other known levels for
         // this course that haven't been reached yet — filtered to the planned route, so
         // branches/endings you're not attempting don't clutter the box before you get there.
@@ -67,8 +75,7 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         orderedUids.addAll(seenThisRun)
         courseSplits.levelNames.keys.forEach { uid ->
             if (uid in seenThisRun) return@forEach
-            val name = courseSplits.levelNames[uid] ?: return@forEach
-            if (isPlannedSection(classifyDojoSection(name))) orderedUids.add(uid)
+            if (isPlannedSection(classifyDojoSection(nameOf(uid)))) orderedUids.add(uid)
         }
 
         if (orderedUids.isEmpty()) {
@@ -79,14 +86,19 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
             return@grid
         }
 
+        var previousGroup: DojoSectionGroup? = null
         orderedUids.forEach { uid ->
-            val fallbackName = courseSplits.levelNames[uid]
-                ?: timer?.completedSplits?.firstOrNull { it.levelUid == uid }?.levelName
-                ?: timer?.takeIf { it.currentLevelUid == uid }?.levelName
-                ?: "???"
-            DojoSplitRowWidget(uid, fallbackName, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
+            val name = nameOf(uid)
+            val currentGroup = classifyDojoSection(name).group()
+            if (previousGroup != null && currentGroup != previousGroup) {
+                DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
+            }
+            previousGroup = currentGroup
+
+            DojoSplitRowWidget(uid, name, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
         }
 
+        DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
         DojoSplitSummaryWidget(orderedUids, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
     }
 

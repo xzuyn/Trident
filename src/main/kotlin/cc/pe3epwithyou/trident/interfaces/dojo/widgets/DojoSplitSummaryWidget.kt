@@ -22,7 +22,7 @@ class DojoSplitSummaryWidget(
 ) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
         const val HEIGHT = 11
-        private const val PADDING = 3
+        private const val PADDING = 5
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {

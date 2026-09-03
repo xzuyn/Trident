@@ -1,8 +1,10 @@
 package cc.pe3epwithyou.trident.interfaces.dojo.widgets
 
 import cc.pe3epwithyou.trident.config.Config
+import cc.pe3epwithyou.trident.feature.dojo.DojoSection
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
+import cc.pe3epwithyou.trident.feature.dojo.classifyDojoSection
 import cc.pe3epwithyou.trident.utils.extensions.GraphicsExtensions.fillRoundedAll
 import cc.pe3epwithyou.trident.utils.minecraft
 import com.noxcrew.sheeplib.util.opaqueColor
@@ -23,8 +25,9 @@ class DojoSplitRowWidget(
     width: Int
 ) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
-        const val HEIGHT = 10
-        private const val PADDING = 3
+        const val HEIGHT = 11
+        private const val PADDING = 5
+        private const val GAP = 5
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -76,7 +79,7 @@ class DojoSplitRowWidget(
             reached -> ChatFormatting.GRAY
             else -> ChatFormatting.DARK_GRAY
         }
-        val nameComponent = Component.literal(name.uppercase()).withStyle(nameColor)
+        val nameComponent = Component.literal(displayName(name)).withStyle(nameColor)
         graphics.text(font, nameComponent, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         val timeText = if (time != null) String.format("%.3f", time) else "--.---"
@@ -90,7 +93,14 @@ class DojoSplitRowWidget(
         val sign = if (delta > 0) "+" else ""
         val deltaComponent = Component.literal("$sign${String.format("%.2f", delta)}").withStyle(deltaColor)
         val deltaWidth = font.width(deltaComponent)
-        graphics.text(font, deltaComponent, x + width - timeWidth - deltaWidth - PADDING - 4, y + 1, 0xFFFFFF.opaqueColor())
+        graphics.text(font, deltaComponent, x + width - timeWidth - deltaWidth - PADDING - GAP, y + 1, 0xFFFFFF.opaqueColor())
+    }
+
+    private fun displayName(rawName: String): String = when (classifyDojoSection(rawName)) {
+        DojoSection.ENDING_EASY -> "ENDING (EASY)"
+        DojoSection.ENDING_MEDIUM -> "ENDING (MEDIUM)"
+        DojoSection.ENDING_HARD -> "ENDING (HARD)"
+        else -> rawName.uppercase()
     }
 
     override fun updateWidgetNarration(narrationElementOutput: NarrationElementOutput) = Unit
