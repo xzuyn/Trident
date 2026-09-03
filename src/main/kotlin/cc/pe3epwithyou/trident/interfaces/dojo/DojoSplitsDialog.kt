@@ -81,17 +81,21 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         val namesByUid = courseSplits.levelNames
 
         // A level's uid is stable across runs (it's derived from its name + styling), so once
-        // we've seen a name before we can look its uid back up and pre-populate its row.
-        fun findUid(name: String): String? {
+        // we've seen a name before we can look its uid back up and pre-populate its row. If a
+        // planned name has never been seen at all, fall back to a synthetic placeholder uid so
+        // the row still shows (with "--.---") rather than silently disappearing — that's the
+        // only way to tell "never run before" apart from an actual bug.
+        fun findUid(name: String): String {
             if (timer != null && !timer.isBetween && timer.levelName == name) return timer.currentLevelUid
             timer?.completedSplits?.firstOrNull { it.levelName == name }?.let { return it.levelUid }
-            return namesByUid.entries.firstOrNull { it.value == name }?.key
+            namesByUid.entries.firstOrNull { it.value == name }?.let { return it.key }
+            return "planned:$name"
         }
 
         val orderedUids = mutableListOf<String>()
         val matchedUids = linkedSetOf<String>()
         buildCanonicalOrder().forEach { name ->
-            val uid = findUid(name) ?: return@forEach
+            val uid = findUid(name)
             orderedUids.add(uid)
             matchedUids.add(uid)
         }
@@ -114,7 +118,7 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         fun nameOf(uid: String): String = namesByUid[uid]
             ?: timer?.completedSplits?.firstOrNull { it.levelUid == uid }?.levelName
             ?: timer?.takeIf { it.currentLevelUid == uid }?.levelName
-            ?: "???"
+            ?: uid.removePrefix("planned:")
 
         var previousGroup: DojoSectionGroup? = null
         orderedUids.forEach { uid ->

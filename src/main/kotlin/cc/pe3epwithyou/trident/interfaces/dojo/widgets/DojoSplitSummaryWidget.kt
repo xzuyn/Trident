@@ -21,8 +21,9 @@ class DojoSplitSummaryWidget(
     width: Int
 ) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
-        const val HEIGHT = 11
+        const val HEIGHT = 22
         private const val PADDING = 5
+        private const val LINE_HEIGHT = 11
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -72,9 +73,9 @@ class DojoSplitSummaryWidget(
             val sign = if (cumulativeDelta > 0) "+" else ""
             "$sign${String.format("%.2f", cumulativeDelta)}s"
         }
-        val paceComponent = Component.literal(paceValue).withStyle(paceColor)
-        val paceWidth = font.width(paceComponent)
-        graphics.text(font, paceComponent, x + width - paceWidth - PADDING, y + 1, 0xFFFFFF.opaqueColor())
+        val paceLabel = Component.literal("PACE ").withStyle(ChatFormatting.GRAY)
+            .append(Component.literal(paceValue).withStyle(paceColor))
+        graphics.text(font, paceLabel, x + PADDING, y + LINE_HEIGHT + 1, 0xFFFFFF.opaqueColor())
     }
 
     private fun formatTime(seconds: Double): String {
