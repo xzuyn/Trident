@@ -13,6 +13,7 @@ import cc.pe3epwithyou.trident.feature.chat.chatroom.Chatrooms
 import cc.pe3epwithyou.trident.feature.crafting.CraftingNotifications
 import cc.pe3epwithyou.trident.feature.crafting.NotificationLifecycle
 import cc.pe3epwithyou.trident.feature.debug.TridentDebugEntry
+import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.discord.IPCManager
 import cc.pe3epwithyou.trident.feature.disguise.Disguise
@@ -133,6 +134,12 @@ class Trident : ModInitializer {
             if (!MCCIState.isOnIsland()) return@register
             if (MCCIState.game != Game.FISHING) return@register
             FishingSpotListener.handle()
+        }
+
+        ClientTickEvents.END_CLIENT_TICK.register {
+            if (!MCCIState.isOnIsland()) return@register
+            if (MCCIState.game != Game.PARKOUR_WARRIOR_DOJO) return@register
+            DojoSplitManager.pollCourseName()
         }
 
 //        Register Questing events

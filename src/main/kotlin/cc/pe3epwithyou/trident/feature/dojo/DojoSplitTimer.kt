@@ -209,7 +209,6 @@ class DojoSplitTimer private constructor(val courseName: String?) {
                 val courseName = if (MCCIState.game == Game.PARKOUR_WARRIOR_DOJO) {
                     ScoreboardUtils.findInScoreboard(COURSE_NAME_PATTERN)?.groupValues?.getOrNull(1)
                 } else null
-                if (courseName != null) DojoSplitManager.lastCourseName = courseName
                 setInstance(DojoSplitTimer(courseName))
                 Logger.debugLog("DojoSplitTimer - Started timer!")
             }

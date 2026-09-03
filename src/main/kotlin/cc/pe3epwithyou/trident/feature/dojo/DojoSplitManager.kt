@@ -1,15 +1,33 @@
 package cc.pe3epwithyou.trident.feature.dojo
 
 import cc.pe3epwithyou.trident.config.Config
+import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.state.DojoCourseSplits
 import cc.pe3epwithyou.trident.state.DojoSplit
 import cc.pe3epwithyou.trident.state.PlayerStateIO
 import cc.pe3epwithyou.trident.utils.Logger
+import cc.pe3epwithyou.trident.utils.ScoreboardUtils
 import cc.pe3epwithyou.trident.utils.playerState
 
 object DojoSplitManager {
-    /** The most recently attempted course this session, so the splits dialog has something to show between runs. */
+    private val COURSE_NAME_PATTERN = Regex("""COURSE: (.*)""")
+
+    /** The most recently seen course this session, so the splits dialog has something to show before/between runs. */
     var lastCourseName: String? = null
+        private set
+
+    /**
+     * Polls the sidebar scoreboard for the currently selected course, so the splits dialog
+     * updates as soon as you walk into a course rather than waiting for a run to start.
+     * Called once per tick while in Parkour Warrior: Dojo (see [cc.pe3epwithyou.trident.Trident]).
+     */
+    fun pollCourseName() {
+        if (DojoSplitTimer.instance != null) return // an active run already knows its own course
+        val detected = ScoreboardUtils.findInScoreboard(COURSE_NAME_PATTERN)?.groupValues?.getOrNull(1) ?: return
+        if (detected == lastCourseName) return
+        lastCourseName = detected
+        DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
+    }
 
     /**
      * Gets (or creates) the [DojoCourseSplits] for a course, keyed off its display name.

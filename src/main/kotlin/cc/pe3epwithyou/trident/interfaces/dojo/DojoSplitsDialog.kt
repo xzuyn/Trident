@@ -1,7 +1,11 @@
 package cc.pe3epwithyou.trident.interfaces.dojo
 
+import cc.pe3epwithyou.trident.config.Config
+import cc.pe3epwithyou.trident.feature.dojo.DojoEnding
+import cc.pe3epwithyou.trident.feature.dojo.DojoSection
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
+import cc.pe3epwithyou.trident.feature.dojo.classifyDojoSection
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitRowWidget
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitSummaryWidget
 import cc.pe3epwithyou.trident.interfaces.shared.TridentDialog
@@ -53,14 +57,19 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         val courseSplits = DojoSplitManager.getCourseSplits(course)
 
         // Order: levels reached this run first (in order), then any other known levels for
-        // this course that haven't been reached yet, shown with their historical best time.
+        // this course that haven't been reached yet — filtered to the planned route, so
+        // branches/endings you're not attempting don't clutter the box before you get there.
         val seenThisRun = linkedSetOf<String>()
         timer?.completedSplits?.forEach { seenThisRun.add(it.levelUid) }
         if (timer != null && !timer.isBetween) seenThisRun.add(timer.currentLevelUid)
 
         val orderedUids = mutableListOf<String>()
         orderedUids.addAll(seenThisRun)
-        courseSplits.levelNames.keys.forEach { uid -> if (uid !in seenThisRun) orderedUids.add(uid) }
+        courseSplits.levelNames.keys.forEach { uid ->
+            if (uid in seenThisRun) return@forEach
+            val name = courseSplits.levelNames[uid] ?: return@forEach
+            if (isPlannedSection(classifyDojoSection(name))) orderedUids.add(uid)
+        }
 
         if (orderedUids.isEmpty()) {
             StringWidget(
@@ -84,5 +93,19 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
     override fun refresh() {
         title = getTitleWidget()
         super.refresh()
+    }
+
+    /**
+     * Whether a not-yet-reached section belongs to the route currently planned in config.
+     * Levels actually reached or completed this run are always shown regardless of this.
+     */
+    private fun isPlannedSection(section: DojoSection): Boolean = when (section) {
+        DojoSection.MAIN -> true
+        DojoSection.BONUS_1 -> Config.Dojo.routeBonus1
+        DojoSection.BONUS_2 -> Config.Dojo.routeBonus2
+        DojoSection.BONUS_3 -> Config.Dojo.routeBonus3
+        DojoSection.ENDING_EASY -> Config.Dojo.routeEnding == DojoEnding.EASY
+        DojoSection.ENDING_MEDIUM -> Config.Dojo.routeEnding == DojoEnding.MEDIUM
+        DojoSection.ENDING_HARD -> Config.Dojo.routeEnding == DojoEnding.HARD
     }
 }

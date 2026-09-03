@@ -12,18 +12,17 @@ import net.minecraft.network.chat.Component
 
 /**
  * Shows a running "best possible time" estimate (completed times + best-known times for the
- * rest of the course) and a cumulative pace delta, similar to LiveSplit's sum-of-best / possible
- * time save readouts. Only counts levels this course has been seen to have, so it undercounts
- * courses with unexplored bonus branches.
+ * rest of the planned route) and a cumulative pace delta, similar to LiveSplit's sum-of-best /
+ * possible time save readouts. Only counts levels in [orderedUids], so it reflects whatever
+ * route was planned for this run.
  */
 class DojoSplitSummaryWidget(
     private val orderedUids: List<String>,
     width: Int
 ) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
-        const val HEIGHT = 22
+        const val HEIGHT = 11
         private const val PADDING = 3
-        private const val TIME_LIMIT_SECONDS = 300.0
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -64,30 +63,18 @@ class DojoSplitSummaryWidget(
             }
         }
 
-        var rowY = y + 1
         val bestLabel = Component.literal("BEST POSSIBLE ").withStyle(ChatFormatting.GRAY)
             .append(Component.literal(formatTime(bestPossible) + (if (!knownRemaining) "+" else "")).withStyle(ChatFormatting.WHITE))
-        graphics.text(font, bestLabel, x + PADDING, rowY, 0xFFFFFF.opaqueColor())
-        rowY += 10
+        graphics.text(font, bestLabel, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         val paceColor = if (!hasDelta) ChatFormatting.GRAY else if (cumulativeDelta > 0) ChatFormatting.RED else ChatFormatting.GREEN
         val paceValue = if (!hasDelta) "--" else {
             val sign = if (cumulativeDelta > 0) "+" else ""
             "$sign${String.format("%.2f", cumulativeDelta)}s"
         }
-        val paceLabel = Component.literal("PACE ").withStyle(ChatFormatting.GRAY)
-            .append(Component.literal(paceValue).withStyle(paceColor))
-        graphics.text(font, paceLabel, x + PADDING, rowY, 0xFFFFFF.opaqueColor())
-
-        val elapsed = timer?.totalElapsedSeconds()
-        if (elapsed != null) {
-            val timeLeft = TIME_LIMIT_SECONDS - elapsed
-            val limitColor = if (timeLeft < 0) ChatFormatting.RED else if (timeLeft < 30) ChatFormatting.YELLOW else ChatFormatting.GRAY
-            val limitText = Component.literal(if (timeLeft >= 0) "5:00 -${formatTime(timeLeft)}" else "5:00 EXCEEDED")
-                .withStyle(limitColor)
-            val limitWidth = font.width(limitText)
-            graphics.text(font, limitText, x + width - limitWidth - PADDING, rowY, 0xFFFFFF.opaqueColor())
-        }
+        val paceComponent = Component.literal(paceValue).withStyle(paceColor)
+        val paceWidth = font.width(paceComponent)
+        graphics.text(font, paceComponent, x + width - paceWidth - PADDING, y + 1, 0xFFFFFF.opaqueColor())
     }
 
     private fun formatTime(seconds: Double): String {

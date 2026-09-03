@@ -3,6 +3,7 @@ package cc.pe3epwithyou.trident.config
 import cc.pe3epwithyou.trident.config.groups.*
 import cc.pe3epwithyou.trident.feature.api.ApiProvider
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
+import cc.pe3epwithyou.trident.feature.dojo.DojoEnding
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitType
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedPosition
 import cc.pe3epwithyou.trident.feature.rarityslot.DisplayType
@@ -143,6 +144,18 @@ class Config {
 
     @SerialEntry
     var dojoSaveMode: DojoSplitType = DojoSplitType.BEST
+
+    @SerialEntry
+    var dojoRouteBonus1: Boolean = true
+
+    @SerialEntry
+    var dojoRouteBonus2: Boolean = true
+
+    @SerialEntry
+    var dojoRouteBonus3: Boolean = true
+
+    @SerialEntry
+    var dojoRouteEnding: DojoEnding = DojoEnding.HARD
 
 
     @SerialEntry
@@ -302,6 +315,14 @@ class Config {
             get() = handler.instance().dojoShowTimerImprovementAt
         val saveMode: DojoSplitType
             get() = handler.instance().dojoSaveMode
+        val routeBonus1: Boolean
+            get() = handler.instance().dojoRouteBonus1
+        val routeBonus2: Boolean
+            get() = handler.instance().dojoRouteBonus2
+        val routeBonus3: Boolean
+            get() = handler.instance().dojoRouteBonus3
+        val routeEnding: DojoEnding
+            get() = handler.instance().dojoRouteEnding
     }
 
     object KillFeed {
