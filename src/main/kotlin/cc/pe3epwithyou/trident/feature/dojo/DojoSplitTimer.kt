@@ -42,6 +42,7 @@ data class DojoSplitRow(
  */
 class DojoSplitTimer private constructor(val courseName: String?) {
     private var lastSplitTimestamp: Long = System.currentTimeMillis()
+    private var hasStartedFirstLevel: Boolean = false
     private val runStartTimestamp: Long = System.currentTimeMillis()
 
     var levelName: String = "M1-1"
@@ -76,8 +77,16 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val matcher = LEVEL_NAME_PATTERN.matcher(string)
         if (!matcher.find()) return
 
-        // This subtitle is sent ~1.5s after the level actually starts, so compensate
-        lastSplitTimestamp = System.currentTimeMillis() - 1500
+        if (hasStartedFirstLevel) {
+            // Subsequent level transitions: the subtitle lags ~1.5s behind the level actually
+            // starting (right as the previous level's medal is earned), so compensate.
+            lastSplitTimestamp = System.currentTimeMillis() - 1500
+        } else {
+            // First level of the run: lastSplitTimestamp is still the "go" timestamp from
+            // construction, so the run-up between "go" and reaching this level counts as
+            // part of its split — there's no prior medal event to compensate a lag against.
+            hasStartedFirstLevel = true
+        }
         levelName = matcher.group(1)
         isBetween = false
 

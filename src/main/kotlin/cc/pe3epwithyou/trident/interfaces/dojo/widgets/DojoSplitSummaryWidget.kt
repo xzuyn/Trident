@@ -11,10 +11,14 @@ import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.network.chat.Component
 
 /**
- * Shows a running "best possible time" estimate (completed times + best-known times for the
- * rest of the planned route) and a cumulative pace delta, similar to LiveSplit's sum-of-best /
- * possible time save readouts. Only counts levels in [orderedUids], so it reflects whatever
- * route was planned for this run.
+ * Two summary lines under the split list:
+ * - CURRENT PACE: actual elapsed time so far this run (from the "go" sound — the same clock
+ *   the game's own HUD timer uses) plus best-known times for every section not yet reached.
+ *   A live projection of your total if the rest of the run goes to plan.
+ * - BEST POSSIBLE: the sum of your best-ever time on every planned section, independent of
+ *   how this particular run is going — the theoretical ceiling for the planned route.
+ *
+ * Only counts levels in [orderedUids], so both numbers reflect whatever route was planned.
  */
 class DojoSplitSummaryWidget(
     private val orderedUids: List<String>,
@@ -31,51 +35,32 @@ class DojoSplitSummaryWidget(
         val timer = DojoSplitTimer.instance
         val course = timer?.courseName ?: DojoSplitManager.lastCourseName
 
-        var bestPossible = 0.0
-        var knownRemaining = true
-        var cumulativeDelta = 0.0
-        var hasDelta = false
+        var remainingBest = 0.0
+        var remainingKnown = true
+        var totalBest = 0.0
+        var totalKnown = true
 
         orderedUids.forEach { uid ->
-            val completed = timer?.completedSplits?.firstOrNull { it.levelUid == uid }
-            when {
-                completed != null -> {
-                    bestPossible += completed.timeSeconds
-                    completed.deltaSeconds?.let {
-                        cumulativeDelta += it
-                        hasDelta = true
-                    }
-                }
+            val best = course?.let { DojoSplitManager.getSplitSeconds(it, uid) }
+            if (best != null) totalBest += best else totalKnown = false
 
-                timer != null && !timer.isBetween && timer.currentLevelUid == uid -> {
-                    val best = course?.let { DojoSplitManager.getSplitSeconds(it, uid) }
-                    val live = timer.currentSplitTimeSeconds()
-                    bestPossible += if (best != null) maxOf(best, live) else live
-                    timer.splitImprovement()?.let {
-                        cumulativeDelta += it
-                        hasDelta = true
-                    }
-                }
-
-                else -> {
-                    val best = course?.let { DojoSplitManager.getSplitSeconds(it, uid) }
-                    if (best != null) bestPossible += best else knownRemaining = false
-                }
+            val alreadyDone = timer != null &&
+                (timer.completedSplits.any { it.levelUid == uid } || (!timer.isBetween && timer.currentLevelUid == uid))
+            if (!alreadyDone) {
+                if (best != null) remainingBest += best else remainingKnown = false
             }
         }
 
-        val bestLabel = Component.literal("BEST POSSIBLE ").withStyle(ChatFormatting.GRAY)
-            .append(Component.literal(formatTime(bestPossible) + (if (!knownRemaining) "+" else "")).withStyle(ChatFormatting.WHITE))
-        graphics.text(font, bestLabel, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
+        val paceSeconds = (timer?.totalElapsedSeconds() ?: 0.0) + remainingBest
+        val paceText = formatTime(paceSeconds) + (if (!remainingKnown) "+" else "")
+        val paceLabel = Component.literal("CURRENT PACE ").withStyle(ChatFormatting.GRAY)
+            .append(Component.literal(paceText).withStyle(ChatFormatting.WHITE))
+        graphics.text(font, paceLabel, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
-        val paceColor = if (!hasDelta) ChatFormatting.GRAY else if (cumulativeDelta > 0) ChatFormatting.RED else ChatFormatting.GREEN
-        val paceValue = if (!hasDelta) "--" else {
-            val sign = if (cumulativeDelta > 0) "+" else ""
-            "$sign${String.format("%.2f", cumulativeDelta)}s"
-        }
-        val paceLabel = Component.literal("PACE ").withStyle(ChatFormatting.GRAY)
-            .append(Component.literal(paceValue).withStyle(paceColor))
-        graphics.text(font, paceLabel, x + PADDING, y + LINE_HEIGHT + 1, 0xFFFFFF.opaqueColor())
+        val bestText = formatTime(totalBest) + (if (!totalKnown) "+" else "")
+        val bestLabel = Component.literal("BEST POSSIBLE ").withStyle(ChatFormatting.GRAY)
+            .append(Component.literal(bestText).withStyle(ChatFormatting.WHITE))
+        graphics.text(font, bestLabel, x + PADDING, y + LINE_HEIGHT + 1, 0xFFFFFF.opaqueColor())
     }
 
     private fun formatTime(seconds: Double): String {
