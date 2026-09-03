@@ -49,6 +49,7 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
      * endings. Bonus branches not planned in config are left out entirely.
      */
     private fun buildCanonicalOrder(): List<String> = buildList {
+        add("START")
         if (Config.Dojo.routeBonus1) addAll(listOf("B1-1", "B1-2", "B1-3"))
         addAll(listOf("M1-1", "M1-2", "M1-3"))
         if (Config.Dojo.routeBonus2) addAll(listOf("B2-1", "B2-2", "B2-3"))

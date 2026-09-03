@@ -8,15 +8,16 @@ package cc.pe3epwithyou.trident.feature.dojo
  * ending), with the second number picking the difficulty.
  */
 enum class DojoSection {
-    MAIN, BONUS_1, BONUS_2, BONUS_3, ENDING_EASY, ENDING_MEDIUM, ENDING_HARD
+    START, MAIN, BONUS_1, BONUS_2, BONUS_3, ENDING_EASY, ENDING_MEDIUM, ENDING_HARD
 }
 
 /** Groups the [DojoSection] variants that should be visually separated in the split list. */
 enum class DojoSectionGroup {
-    MAIN, BONUS_1, BONUS_2, BONUS_3, ENDING
+    START, MAIN, BONUS_1, BONUS_2, BONUS_3, ENDING
 }
 
 fun DojoSection.group(): DojoSectionGroup = when (this) {
+    DojoSection.START -> DojoSectionGroup.START
     DojoSection.MAIN -> DojoSectionGroup.MAIN
     DojoSection.BONUS_1 -> DojoSectionGroup.BONUS_1
     DojoSection.BONUS_2 -> DojoSectionGroup.BONUS_2
@@ -33,6 +34,7 @@ private val BRANCH_PATTERN = Regex("""B(\d)-(\d)""")
  * route planner; levels you've actually reached or completed are always shown regardless.
  */
 fun classifyDojoSection(levelName: String): DojoSection {
+    if (levelName.equals("START", ignoreCase = true)) return DojoSection.START
     val match = BRANCH_PATTERN.find(levelName.uppercase()) ?: return DojoSection.MAIN
     val branch = match.groupValues[1].toIntOrNull() ?: return DojoSection.MAIN
     val index = match.groupValues[2].toIntOrNull() ?: 3

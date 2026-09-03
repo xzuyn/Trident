@@ -44,14 +44,14 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     private var lastSplitTimestamp: Long = System.currentTimeMillis()
     private val runStartTimestamp: Long = System.currentTimeMillis()
 
-    var levelName: String = "M1-1"
+    var levelName: String = "START"
         private set
 
-    var currentLevelUid: String = ""
+    var currentLevelUid: String = START_UID
         private set
 
     /** Whether the player is currently between levels (not actively timing a split). */
-    var isBetween: Boolean = true
+    var isBetween: Boolean = false
         private set
 
     /** Levels completed so far this run, in order, for the LiveSplit-style split list. */
@@ -76,13 +76,14 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val matcher = LEVEL_NAME_PATTERN.matcher(string)
         if (!matcher.find()) return
 
-        // This subtitle is sent ~1.5s after the level actually starts, so compensate. Note
-        // this is deliberately unconditional, including for the very first level of a run:
-        // per-level split times are measured this way consistently (and match what's already
-        // saved as historical bests), so the run-up between "go" and the first level is
-        // intentionally *not* folded into M1-1's split — it's accounted for separately via
-        // totalElapsedSeconds(), which starts at construction (the "go" sound) and is never
-        // reset here.
+        // The run-up between "go" and the first real level is tracked as its own implicit
+        // "START" split (see the field initializers above) rather than being silently
+        // dropped. It has no medal event marking its end, so finalize it here instead, using
+        // the true elapsed time since "go" — lastSplitTimestamp hasn't moved since
+        // construction, so no lag compensation is needed or applied.
+        if (currentLevelUid == START_UID) saveSplit(silent = true)
+
+        // This subtitle is sent ~1.5s after the level actually starts, so compensate.
         lastSplitTimestamp = System.currentTimeMillis() - 1500
         levelName = matcher.group(1)
         isBetween = false
@@ -109,7 +110,7 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         isBetween = true
     }
 
-    fun saveSplit() {
+    fun saveSplit(silent: Boolean = false) {
         val course = courseName ?: return
         val finishedUid = currentLevelUid
         val finishedName = levelName
@@ -117,7 +118,7 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val delta = if (Config.Dojo.showSplitImprovements) splitImprovement() else null
         completedSplits.add(DojoSplitRow(finishedUid, finishedName, finishedTime, delta))
 
-        sendSplitCompleteMessage()
+        if (!silent) sendSplitCompleteMessage()
         DojoSplitManager.saveSplit(course, finishedUid, finishedName, currentSplitTimeMillis())
         DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
     }
@@ -186,6 +187,9 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     companion object {
         private val LEVEL_NAME_PATTERN: Pattern = Pattern.compile("\\[(.*)]")
         private val COURSE_NAME_PATTERN = Regex("""COURSE: (.*)""")
+
+        /** Synthetic uid for the implicit "run-up" split between "go" and the first real level. */
+        const val START_UID = "start"
 
         var instance: DojoSplitTimer? = null
             private set
