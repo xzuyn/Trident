@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component
  * - CURRENT PACE: the actual times of splits completed on this run, plus best-known times
  *   for every split not yet completed (including the currently active split). This is a
  *   projection of the final run time that does not move while an active split is being played.
- * - BEST POSSIBLE: the sum of your best-ever time on every planned section, independent of
+ * - SUM OF BEST: the sum of your best-ever time on every planned section, independent of
  *   how this particular run is going — the theoretical ceiling for the planned route.
  *
  * Only counts levels in [orderedUids], so both numbers reflect whatever route was planned.
@@ -75,7 +75,7 @@ class DojoSplitSummaryWidget(
         graphics.text(font, paceLabel, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         val bestText = formatTime(totalBest) + (if (!totalKnown) "+" else "")
-        val bestLabel = Component.literal("BEST POSSIBLE ").withStyle(ChatFormatting.GRAY)
+        val bestLabel = Component.literal("SUM OF BEST ").withStyle(ChatFormatting.GRAY)
             .append(Component.literal(bestText).withStyle(ChatFormatting.WHITE))
         graphics.text(font, bestLabel, x + PADDING, y + LINE_HEIGHT + 1, 0xFFFFFF.opaqueColor())
     }
