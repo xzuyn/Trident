@@ -22,7 +22,7 @@ object DojoSplitManager {
      * Called once per tick while in Parkour Warrior: Dojo (see [cc.pe3epwithyou.trident.Trident]).
      */
     fun pollCourseName() {
-        if (DojoSplitTimer.instance != null) return // an active run already knows its own course
+        if (DojoSplitTimer.instance?.isFinished == false) return // an actively-running run already knows its own course
         val detected = ScoreboardUtils.findInScoreboard(COURSE_NAME_PATTERN)?.groupValues?.getOrNull(1) ?: return
         if (detected == lastCourseName) return
         lastCourseName = detected

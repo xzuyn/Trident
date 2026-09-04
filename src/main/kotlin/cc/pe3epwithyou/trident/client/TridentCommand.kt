@@ -13,6 +13,7 @@ import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.discord.IPCManager
 import cc.pe3epwithyou.trident.feature.disguise.Disguise
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
+import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.exchange.ExchangeHandler
 import cc.pe3epwithyou.trident.feature.fishing.OverclockHandlers
 import cc.pe3epwithyou.trident.feature.killfeed.KillMethod
@@ -111,6 +112,7 @@ object TridentCommand {
             literal("cleardojosplits") {
                 executes {
                     DojoSplitManager.clearSplits()
+                    DojoSplitTimer.clearDisplay()
 
                     val c = Component.literal("Your Dojo splits have been successfully ")
                         .withSwatch(TridentFont.TRIDENT_COLOR).append(

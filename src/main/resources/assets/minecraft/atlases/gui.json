@@ -15,6 +15,10 @@
     {
       "type": "single",
       "resource": "trident:dojo/split_down"
+    },
+    {
+      "type": "single",
+      "resource": "trident:dojo/reset"
     }
   ]
 }

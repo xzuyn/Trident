@@ -11,7 +11,6 @@ import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitDividerWidget
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitRowWidget
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitSummaryWidget
 import cc.pe3epwithyou.trident.interfaces.shared.TridentDialog
-import cc.pe3epwithyou.trident.interfaces.themes.DialogTitle
 import cc.pe3epwithyou.trident.interfaces.themes.TridentThemed
 import cc.pe3epwithyou.trident.state.FontCollection
 import cc.pe3epwithyou.trident.utils.extensions.ComponentExtensions.mccFont
@@ -34,11 +33,11 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         private val TITLE_COLOR: Int = 0x038AFF opacity 127
     }
 
-    private fun getTitleWidget(): DialogTitle {
+    private fun getTitleWidget(): DojoDialogTitle {
         val title = FontCollection.get("_fonts/icon/quest_log.png").withStyle(
             Style.EMPTY.withoutShadow()
         ).append(Component.literal(" SPLITS").mccFont().offset(y = -0.5f))
-        return DialogTitle(this, title, TITLE_COLOR)
+        return DojoDialogTitle(this, title, TITLE_COLOR)
     }
 
     override var title = getTitleWidget()
@@ -46,23 +45,34 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
     /**
      * Every Dojo course has the same fixed, interleaved layout: bonus branch 1, main group 1,
      * bonus branch 2, main group 2, bonus branch 3, main group 3, then one of the three
-     * endings. Bonus branches not planned in config are left out entirely.
+     * endings. Bonus branches not planned in config are left out entirely. Returns
+     * (compositeUid, displayName) pairs — the uid is "origin_destination" (e.g. "START_M1-1",
+     * "B1-3_M1-1"), since the unnamed transition into a level is folded into its own measured
+     * time and two different transitions into the same level genuinely take different amounts
+     * of time.
      */
-    private fun buildCanonicalOrder(): List<String> = buildList {
-        add("START")
-        if (Config.Dojo.routeBonus1) addAll(listOf("B1-1", "B1-2", "B1-3"))
-        addAll(listOf("M1-1", "M1-2", "M1-3"))
-        if (Config.Dojo.routeBonus2) addAll(listOf("B2-1", "B2-2", "B2-3"))
-        addAll(listOf("M2-1", "M2-2", "M2-3"))
-        if (Config.Dojo.routeBonus3) addAll(listOf("B3-1", "B3-2", "B3-3"))
-        addAll(listOf("M3-1", "M3-2", "M3-3"))
-        add(
-            when (Config.Dojo.routeEnding) {
-                DojoEnding.EASY -> "B4-1"
-                DojoEnding.MEDIUM -> "B4-2"
-                DojoEnding.HARD -> "B4-3"
-            }
-        )
+    private fun buildCanonicalOrder(): List<Pair<String, String>> {
+        val levels = buildList {
+            if (Config.Dojo.routeBonus1) addAll(listOf("B1-1", "B1-2", "B1-3"))
+            addAll(listOf("M1-1", "M1-2", "M1-3"))
+            if (Config.Dojo.routeBonus2) addAll(listOf("B2-1", "B2-2", "B2-3"))
+            addAll(listOf("M2-1", "M2-2", "M2-3"))
+            if (Config.Dojo.routeBonus3) addAll(listOf("B3-1", "B3-2", "B3-3"))
+            addAll(listOf("M3-1", "M3-2", "M3-3"))
+            add(
+                when (Config.Dojo.routeEnding) {
+                    DojoEnding.EASY -> "B4-1"
+                    DojoEnding.MEDIUM -> "B4-2"
+                    DojoEnding.HARD -> "B4-3"
+                }
+            )
+        }
+        var previous = "START"
+        return levels.map { name ->
+            val uid = "${previous}_$name"
+            previous = name
+            uid to name
+        }
     }
 
     override fun layout(): GridLayout = grid {
@@ -78,52 +88,30 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         }
 
         val timer = DojoSplitTimer.instance
-        val courseSplits = DojoSplitManager.getCourseSplits(course)
-        val namesByUid = courseSplits.levelNames
 
-        // A level's uid is stable across runs (it's derived from its name + styling), so once
-        // we've seen a name before we can look its uid back up and pre-populate its row. If a
-        // planned name has never been seen at all, fall back to a synthetic placeholder uid so
-        // the row still shows (with "--.---") rather than silently disappearing — that's the
-        // only way to tell "never run before" apart from an actual bug.
-        fun findUid(name: String): String {
-            if (timer != null && !timer.isBetween && timer.levelName == name) return timer.currentLevelUid
-            timer?.completedSplits?.firstOrNull { it.levelName == name }?.let { return it.levelUid }
-            namesByUid.entries.firstOrNull { it.value == name }?.let { return it.key }
-            return "planned:$name"
-        }
-
-        val orderedUids = mutableListOf<String>()
+        val orderedRows = mutableListOf<Pair<String, String>>()
         val matchedUids = linkedSetOf<String>()
-        buildCanonicalOrder().forEach { name ->
-            val uid = findUid(name)
-            orderedUids.add(uid)
+        buildCanonicalOrder().forEach { (uid, name) ->
+            orderedRows.add(uid to name)
             matchedUids.add(uid)
         }
 
         // Safety net: anything actually reached this run always shows, even if it didn't
-        // match a slot above (e.g. the course layout doesn't match what's hardcoded here).
+        // match a planned slot above (e.g. you deviated from the planned route).
         val seenThisRun = linkedSetOf<String>()
         timer?.completedSplits?.forEach { seenThisRun.add(it.levelUid) }
-        if (timer != null && !timer.isBetween) seenThisRun.add(timer.currentLevelUid)
-        seenThisRun.forEach { uid -> if (uid !in matchedUids) orderedUids.add(uid) }
-
-        if (orderedUids.isEmpty()) {
-            StringWidget(
-                Component.literal("No splits recorded yet".uppercase()).mccFont()
-                    .withStyle(ChatFormatting.GRAY), font
-            ).atBottom(0, settings = LayoutConstants.LEFT)
-            return@grid
+        if (timer != null && !timer.isBetween && timer.currentLevelUid.isNotEmpty()) seenThisRun.add(timer.currentLevelUid)
+        seenThisRun.forEach { uid ->
+            if (uid !in matchedUids) {
+                val name = timer?.completedSplits?.firstOrNull { it.levelUid == uid }?.levelName
+                    ?: timer?.takeIf { it.currentLevelUid == uid }?.levelName
+                    ?: uid
+                orderedRows.add(uid to name)
+            }
         }
 
-        fun nameOf(uid: String): String = namesByUid[uid]
-            ?: timer?.completedSplits?.firstOrNull { it.levelUid == uid }?.levelName
-            ?: timer?.takeIf { it.currentLevelUid == uid }?.levelName
-            ?: uid.removePrefix("planned:")
-
         var previousGroup: DojoSectionGroup? = null
-        orderedUids.forEach { uid ->
-            val name = nameOf(uid)
+        orderedRows.forEach { (uid, name) ->
             val currentGroup = classifyDojoSection(name).group()
             if (previousGroup != null && currentGroup != previousGroup) {
                 DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
@@ -134,7 +122,7 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         }
 
         DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
-        DojoSplitSummaryWidget(orderedUids, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
+        DojoSplitSummaryWidget(orderedRows.map { it.first }, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
     }
 
     override fun refresh() {
