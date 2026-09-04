@@ -10,7 +10,6 @@ import com.noxcrew.sheeplib.dialog.title.DialogTitleWidget
 import com.noxcrew.sheeplib.layout.CanvasLayout
 import com.noxcrew.sheeplib.theme.Themed
 import com.noxcrew.sheeplib.util.opacity
-import com.noxcrew.sheeplib.util.Icon
 import com.noxcrew.sheeplib.widget.IconButton
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.StringWidget
@@ -67,7 +66,7 @@ class DojoDialogTitle(
             .at(top = 0, right = 0)
 
         IconButton(
-            Icon(Resources.trident("dojo/reset"), height = 16, width = 16),
+            theme.icons.dropdown,
             marginY = PADDING + 1,
             marginX = PADDING,
         ) { _, _ -> DojoSplitTimer.clearDisplay() }
