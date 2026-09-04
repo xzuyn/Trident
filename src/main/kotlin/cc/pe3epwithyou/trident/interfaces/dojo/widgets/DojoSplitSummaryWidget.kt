@@ -49,12 +49,19 @@ class DojoSplitSummaryWidget(
 
             val completedSplit = completed[uid]
             if (completedSplit != null) {
-                // Only completed splits from this run contribute their actual time.
-                // The active split is deliberately excluded until it is finished.
+                // Completed splits use their actual time from this run.
                 completedTime += completedSplit.timeSeconds
+            } else if (timer?.currentLevelUid == uid && !timer.isBetween) {
+                // The active split uses its historical best until the live time exceeds it.
+                // Once we're slower than best, switch to the actual current split time so
+                // the pace reflects the fact that the run is now behind pace.
+                if (best != null) {
+                    remainingBest += maxOf(best, timer.currentSplitTimeSeconds())
+                } else {
+                    remainingKnown = false
+                }
             } else {
-                // Unfinished splits, including the currently active one, contribute
-                // their historical best rather than the live elapsed timer.
+                // Future / otherwise unfinished splits use their historical best.
                 if (best != null) remainingBest += best else remainingKnown = false
             }
         }
