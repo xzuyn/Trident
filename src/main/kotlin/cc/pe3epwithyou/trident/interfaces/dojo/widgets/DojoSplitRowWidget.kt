@@ -67,7 +67,9 @@ class DojoSplitRowWidget(
             else -> {
                 val course = timer?.courseName ?: DojoSplitManager.lastCourseName
                 name = fallbackName
-                time = course?.let { DojoSplitManager.getSplitSeconds(it, levelUid) }
+                val transitionBest = course?.let { DojoSplitManager.getSplitSeconds(it, levelUid) }
+                val levelBest = course?.let { DojoSplitManager.getSplitSeconds(it, fallbackName) }
+                time = if (transitionBest != null && levelBest != null) transitionBest + levelBest else null
                 delta = null
                 live = false
                 reached = false

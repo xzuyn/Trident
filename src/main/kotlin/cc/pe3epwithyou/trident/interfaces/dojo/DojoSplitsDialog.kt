@@ -122,7 +122,7 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         }
 
         DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
-        DojoSplitSummaryWidget(orderedRows.map { it.first }, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
+        DojoSplitSummaryWidget(orderedRows, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
     }
 
     override fun refresh() {

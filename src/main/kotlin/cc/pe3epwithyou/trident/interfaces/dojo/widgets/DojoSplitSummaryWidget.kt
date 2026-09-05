@@ -12,16 +12,16 @@ import net.minecraft.network.chat.Component
 
 /**
  * Two summary lines under the split list:
- * - CURRENT PACE: the actual times of splits completed on this run, plus best-known times
- *   for every split not yet completed (including the currently active split). This is a
- *   projection of the final run time that does not move while an active split is being played.
+ * - CURRENT PACE: actual elapsed time so far this run (from the "go" sound — the same clock
+ *   the game's own HUD timer uses) plus best-known times for every section not yet reached.
+ *   A live projection of your total if the rest of the run goes to plan.
  * - SUM OF BEST: the sum of your best-ever time on every planned section, independent of
  *   how this particular run is going — the theoretical ceiling for the planned route.
  *
- * Only counts levels in [orderedUids], so both numbers reflect whatever route was planned.
+ * Only counts levels in [orderedRows], so both numbers reflect whatever route was planned.
  */
 class DojoSplitSummaryWidget(
-    private val orderedUids: List<String>,
+    private val orderedRows: List<Pair<String, String>>,
     width: Int
 ) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
@@ -35,39 +35,26 @@ class DojoSplitSummaryWidget(
         val timer = DojoSplitTimer.instance
         val course = timer?.courseName ?: DojoSplitManager.lastCourseName
 
-        var completedTime = 0.0
         var remainingBest = 0.0
         var remainingKnown = true
         var totalBest = 0.0
         var totalKnown = true
 
-        val completed = timer?.completedSplits?.associateBy { it.levelUid }.orEmpty()
-
-        orderedUids.forEach { uid ->
-            val best = course?.let { DojoSplitManager.getSplitSeconds(it, uid) }
+        orderedRows.forEach { (uid, levelName) ->
+            val transitionBest = course?.let { DojoSplitManager.getSplitSeconds(it, uid) }
+            val levelBest = course?.let { DojoSplitManager.getSplitSeconds(it, levelName) }
+            val best = if (transitionBest != null && levelBest != null) transitionBest + levelBest else null
             if (best != null) totalBest += best else totalKnown = false
 
-            val completedSplit = completed[uid]
-            if (completedSplit != null) {
-                // Completed splits use their actual time from this run.
-                completedTime += completedSplit.timeSeconds
-            } else if (timer?.currentLevelUid == uid && !timer.isBetween) {
-                // The active split uses its historical best until the live time exceeds it.
-                // Once we're slower than best, switch to the actual current split time so
-                // the pace reflects the fact that the run is now behind pace.
-                if (best != null) {
-                    remainingBest += maxOf(best, timer.currentSplitTimeSeconds())
-                } else {
-                    remainingKnown = false
-                }
-            } else {
-                // Future / otherwise unfinished splits use their historical best.
+            val alreadyDone = timer != null &&
+                (timer.completedSplits.any { it.levelUid == uid } || (!timer.isBetween && timer.currentLevelUid == uid))
+            if (!alreadyDone) {
                 if (best != null) remainingBest += best else remainingKnown = false
             }
         }
 
         val paceText = if (timer == null) "--" else {
-            val paceSeconds = completedTime + remainingBest
+            val paceSeconds = timer.totalElapsedSeconds() + remainingBest
             formatTime(paceSeconds) + (if (!remainingKnown) "+" else "")
         }
         val paceLabel = Component.literal("CURRENT PACE ").withStyle(ChatFormatting.GRAY)

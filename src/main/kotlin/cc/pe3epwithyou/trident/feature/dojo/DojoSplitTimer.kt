@@ -26,10 +26,11 @@ const val DOJO_SPLITS_DIALOG_KEY = "dojo_splits"
 /**
  * One completed split in the current Dojo run, for the LiveSplit-style split list.
  *
- * [levelUid] is a composite `origin_destination` key (e.g. `"START_M1-1"`, `"B1-3_M1-1"`) —
- * the unnamed transition leading into a level is folded into that level's own measured time
- * (see [DojoSplitTimer.handleSubtitle]), and two different transitions into the same
- * destination genuinely take different amounts of time, so they're tracked separately.
+ * [levelUid] is a composite `origin_destination` key (e.g. `"START_M1-1"`, `"B1-3_M1-1"`) — the
+ * unnamed transition leading into a level takes a genuinely different amount of time depending
+ * on where you came from, so it's tracked and saved separately from the level's own obstacle
+ * time (which is identical no matter the route). [timeSeconds] is the two combined, since
+ * that's what's actually displayed as this row's split time.
  */
 data class DojoSplitRow(
     val levelUid: String,
@@ -46,22 +47,27 @@ data class DojoSplitRow(
  * keep showing the finished run's results until the next run actually starts.
  */
 class DojoSplitTimer private constructor(val courseName: String?) {
-    private var lastSplitTimestamp: Long = System.currentTimeMillis()
+    /** When the current segment (transition + level) started: the previous medal, or "go" for the first. */
+    private var transitionStartTimestamp: Long = System.currentTimeMillis()
+
+    /** When the current level's own subtitle arrived — the transition/level boundary. Null while still in the unnamed transition. */
+    private var levelStartTimestamp: Long? = null
+
     private val runStartTimestamp: Long = System.currentTimeMillis()
     private var finishTimestamp: Long? = null
 
-    /** Display name of the just-finished/previous split, used to key the next composite uid. */
+    /** Display name of the just-finished/previous level, used to key the next composite uid. */
     private var previousLevelName: String = "START"
 
-    /** Destination-only display name of the active/last split, e.g. "M1-1". Empty until the first level subtitle arrives. */
+    /** Destination-only name of the active/last level, e.g. "M1-1". Empty until the first level subtitle arrives. Also the key its (route-independent) obstacle time is saved under. */
     var levelName: String = ""
         private set
 
-    /** Composite "origin_destination" key of the active/last split, e.g. "START_M1-1". Empty until the first level subtitle arrives. */
+    /** Composite "origin_destination" key of the active/last level, e.g. "START_M1-1". Empty until the first level subtitle arrives. Also the key its (route-specific) transition time is saved under. */
     var currentLevelUid: String = ""
         private set
 
-    /** Whether we're currently between splits (no level actively being timed). */
+    /** Whether we're currently in the unnamed transition before a level's identity is known (no row can be shown as "live" yet). */
     var isBetween: Boolean = true
         private set
 
@@ -91,10 +97,10 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val matcher = LEVEL_NAME_PATTERN.matcher(string)
         if (!matcher.find()) return
 
-        // Deliberately does NOT reset lastSplitTimestamp: it's been running continuously
-        // since the previous medal (or since construction/"go" for the very first level), so
-        // this split's measured time naturally includes both the unnamed transition leading
-        // here and the obstacle itself — nothing is silently dropped or guessed at.
+        // This is the transition/level boundary: the unnamed corridor leading here ends now,
+        // and the (route-independent) obstacle begins. transitionStartTimestamp is untouched,
+        // so the two pieces can be measured separately once this level's medal is found.
+        levelStartTimestamp = System.currentTimeMillis()
         levelName = matcher.group(1)
         currentLevelUid = "${previousLevelName}_$levelName"
         isBetween = false
@@ -113,27 +119,39 @@ class DojoSplitTimer private constructor(val courseName: String?) {
 
         previousLevelName = levelName
         saveSplit()
-        lastSplitTimestamp = System.currentTimeMillis()
+        transitionStartTimestamp = System.currentTimeMillis()
+        levelStartTimestamp = null
         isBetween = true
     }
 
     fun saveSplit() {
         val course = courseName ?: return
-        if (currentLevelUid.isEmpty()) return // nothing has actually started yet
+        val levelStart = levelStartTimestamp ?: return // nothing has actually started yet
+        if (currentLevelUid.isEmpty()) return
+
+        val now = finishTimestamp ?: System.currentTimeMillis()
+        val transitionSeconds = (levelStart - transitionStartTimestamp) / 1000.0
+        val levelSeconds = (now - levelStart) / 1000.0
+        val totalSeconds = transitionSeconds + levelSeconds
+
         val finishedUid = currentLevelUid
         val finishedName = levelName
-        val finishedTime = currentSplitTimeSeconds()
         val delta = if (Config.Dojo.showSplitImprovements) splitImprovement() else null
-        completedSplits.add(DojoSplitRow(finishedUid, finishedName, finishedTime, delta))
+        completedSplits.add(DojoSplitRow(finishedUid, finishedName, totalSeconds, delta))
 
-        sendSplitCompleteMessage()
-        DojoSplitManager.saveSplit(course, finishedUid, finishedName, currentSplitTimeMillis())
+        sendSplitCompleteMessage(totalSeconds, delta)
+
+        // Saved as two separate historical records under different keys: the transition
+        // (route-specific — depends on where you came from) and the level itself
+        // (route-independent — the same obstacle no matter how you got there).
+        DojoSplitManager.saveSplit(course, finishedUid, finishedName, (transitionSeconds * 1000).toLong())
+        DojoSplitManager.saveSplit(course, finishedName, finishedName, (levelSeconds * 1000).toLong())
         DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
     }
 
-    private fun sendSplitCompleteMessage() {
+    private fun sendSplitCompleteMessage(totalSeconds: Double, delta: Double?) {
         if (!Config.Dojo.sendSplitTime) return
-        val time = String.format("%.3fs", currentSplitTimeSeconds())
+        val time = String.format("%.3fs", totalSeconds)
 
         val component: MutableComponent = Component.literal("[").withStyle(ChatFormatting.GREEN)
             .append(FontCollection.get("_fonts/icon/tick_small"))
@@ -141,13 +159,13 @@ class DojoSplitTimer private constructor(val courseName: String?) {
             .append(Component.translatable("trident.dojo.split_complete", levelName))
             .append(Component.literal(time).withStyle(ChatFormatting.WHITE))
         if (Config.Dojo.showSplitImprovements) {
-            component.append(Component.empty().withStyle(ChatFormatting.WHITE).append(splitImprovementComponent()))
+            component.append(Component.empty().withStyle(ChatFormatting.WHITE).append(splitImprovementComponent(delta)))
         }
         Logger.sendMessage(component)
     }
 
-    private fun splitImprovementComponent(): MutableComponent {
-        val improvement = splitImprovement() ?: 0.0
+    private fun splitImprovementComponent(overrideDelta: Double? = null): MutableComponent {
+        val improvement = overrideDelta ?: splitImprovement() ?: 0.0
         val formatted = String.format("%.2f", improvement)
 
         val color: ChatFormatting
@@ -182,14 +200,20 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     private fun splitIcon(up: Boolean): Component =
         FontCollection.texture(Resources.trident(if (up) "dojo/split_up" else "dojo/split_down"), AtlasIds.GUI)
 
-    fun currentSplitTimeMillis(): Long = (finishTimestamp ?: System.currentTimeMillis()) - lastSplitTimestamp
+    fun currentSplitTimeMillis(): Long = (finishTimestamp ?: System.currentTimeMillis()) - transitionStartTimestamp
     fun currentSplitTimeSeconds(): Double = currentSplitTimeMillis() / 1000.0
     fun totalElapsedSeconds(): Double = ((finishTimestamp ?: System.currentTimeMillis()) - runStartTimestamp) / 1000.0
 
+    /**
+     * Compares the current split's elapsed time against the combined best (transition best +
+     * level best). Only returns a value once both pieces have historical data — no partial
+     * comparisons mid-run.
+     */
     fun splitImprovement(): Double? {
         val course = courseName ?: return null
-        val split = DojoSplitManager.getSplitSeconds(course, currentLevelUid) ?: return null
-        return currentSplitTimeSeconds() - split
+        val transitionBest = DojoSplitManager.getSplitSeconds(course, currentLevelUid) ?: return null
+        val levelBest = DojoSplitManager.getSplitSeconds(course, levelName) ?: return null
+        return currentSplitTimeSeconds() - (transitionBest + levelBest)
     }
 
     /** Freezes this run's clocks in place. Called on round end — the timer keeps existing (and displaying) until a new run starts. */
