@@ -74,6 +74,9 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     /** Once true (round ended/restarted/left), all times are frozen and no more splits are recorded. */
     val isFinished: Boolean get() = finishTimestamp != null
 
+    /** Uid of the last segment actually saved, so a duplicate save attempt (e.g. a race between the medal subtitle and the round-end sound both firing for the same final split) can't double-count it. */
+    private var lastSavedUid: String? = null
+
     /** Splits completed so far this run, in order, for the LiveSplit-style split list. */
     val completedSplits: MutableList<DojoSplitRow> = mutableListOf()
 
@@ -128,6 +131,12 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val course = courseName ?: return
         val levelStart = levelStartTimestamp ?: return // nothing has actually started yet
         if (currentLevelUid.isEmpty()) return
+        // Guards against this exact segment being saved twice — e.g. the round-end sound and
+        // the final medal's subtitle can arrive in either order, and if the sound is
+        // processed first, both the fallback save (see onSound) and the normal medal-detected
+        // save below would otherwise both fire for the same split.
+        if (currentLevelUid == lastSavedUid) return
+        lastSavedUid = currentLevelUid
 
         val now = finishTimestamp ?: System.currentTimeMillis()
         val transitionSeconds = (levelStart - transitionStartTimestamp) / 1000.0
@@ -252,7 +261,12 @@ class DojoSplitTimer private constructor(val courseName: String?) {
                 path == "ui.queue_teleport"
             ) {
                 val current = instance
-                if (current != null && isRoundEnd) current.saveSplit()
+                // Only a fallback for a round ending abruptly before a final medal was ever
+                // detected. The normal case (medal -> then round-end sound) already saved this
+                // split via modifyMedalTitle, at which point isBetween is true — calling
+                // saveSplit() again here would double-save it, covering the gap between the
+                // medal and this sound as a bogus extra split.
+                if (current != null && isRoundEnd && !current.isBetween) current.saveSplit()
                 current?.finish()
                 DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
                 Logger.debugLog("DojoSplitTimer - Ended timer")
