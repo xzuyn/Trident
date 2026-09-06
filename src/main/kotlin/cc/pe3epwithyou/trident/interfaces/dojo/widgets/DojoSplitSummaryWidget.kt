@@ -12,9 +12,12 @@ import net.minecraft.network.chat.Component
 
 /**
  * Two summary lines under the split list:
- * - CURRENT PACE: actual elapsed time so far this run (from the "go" sound — the same clock
- *   the game's own HUD timer uses) plus best-known times for every section not yet reached.
- *   A live projection of your total if the rest of the run goes to plan.
+ * - CURRENT PACE: actual times of splits completed this run, plus the currently active
+ *   split's contribution capped at its own best (or the live time once you've gone over it),
+ *   plus best-known times for every split not yet started. This only moves when a split
+ *   finishes faster than expected, or once the split in progress runs longer than its own
+ *   best — it does not just tick up with the clock. While in the unnamed transition between
+ *   splits (before the next level's identity is known), it holds steady rather than guessing.
  * - SUM OF BEST: the sum of your best-ever time on every planned section, independent of
  *   how this particular run is going — the theoretical ceiling for the planned route.
  *
@@ -35,27 +38,41 @@ class DojoSplitSummaryWidget(
         val timer = DojoSplitTimer.instance
         val course = timer?.courseName ?: DojoSplitManager.lastCourseName
 
-        var remainingBest = 0.0
-        var remainingKnown = true
-        var totalBest = 0.0
-        var totalKnown = true
-
-        orderedRows.forEach { (uid, levelName) ->
+        fun bestFor(uid: String, levelName: String): Double? {
             val transitionBest = course?.let { DojoSplitManager.getSplitSeconds(it, uid) }
             val levelBest = course?.let { DojoSplitManager.getSplitSeconds(it, levelName) }
-            val best = if (transitionBest != null && levelBest != null) transitionBest + levelBest else null
+            return if (transitionBest != null && levelBest != null) transitionBest + levelBest else null
+        }
+
+        var totalBest = 0.0
+        var totalKnown = true
+        var afterCurrentBest = 0.0
+        var afterCurrentKnown = true
+
+        orderedRows.forEach { (uid, levelName) ->
+            val best = bestFor(uid, levelName)
             if (best != null) totalBest += best else totalKnown = false
 
-            val alreadyDone = timer != null &&
-                (timer.completedSplits.any { it.levelUid == uid } || (!timer.isBetween && timer.currentLevelUid == uid))
-            if (!alreadyDone) {
-                if (best != null) remainingBest += best else remainingKnown = false
+            val alreadyDone = timer != null && timer.completedSplits.any { it.levelUid == uid }
+            val isCurrent = timer != null && !timer.isBetween && timer.currentLevelUid == uid
+            if (!alreadyDone && !isCurrent) {
+                if (best != null) afterCurrentBest += best else afterCurrentKnown = false
             }
         }
 
         val paceText = if (timer == null) "--" else {
-            val paceSeconds = timer.totalElapsedSeconds() + remainingBest
-            formatTime(paceSeconds) + (if (!remainingKnown) "+" else "")
+            val completedActual = timer.completedSplits.sumOf { it.timeSeconds }
+            // Only counts once the transition has resolved into a known level (isBetween ==
+            // false) — before that we don't know which best to compare against, so hold
+            // steady rather than ticking up on an unresolved guess.
+            val currentContribution = if (!timer.isBetween) {
+                val currentBest = bestFor(timer.currentLevelUid, timer.levelName)
+                val live = timer.currentSplitTimeSeconds()
+                if (currentBest != null) maxOf(currentBest, live) else live
+            } else 0.0
+
+            val paceSeconds = completedActual + currentContribution + afterCurrentBest
+            formatTime(paceSeconds) + (if (!afterCurrentKnown) "+" else "")
         }
         val paceLabel = Component.literal("CURRENT PACE ").withStyle(ChatFormatting.GRAY)
             .append(Component.literal(paceText).withStyle(if (timer == null) ChatFormatting.DARK_GRAY else ChatFormatting.WHITE))
