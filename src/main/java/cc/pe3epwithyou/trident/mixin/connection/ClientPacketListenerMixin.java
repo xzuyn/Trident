@@ -11,6 +11,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,6 +43,18 @@ public class ClientPacketListenerMixin {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         if (MCCIState.INSTANCE.getGame() != Game.PARKOUR_WARRIOR_DOJO) return;
         DojoSplitTimer.onSound(clientboundSoundPacket);
+    }
+
+    // "Run Complete!" is delivered as a title (the big banner), not the subtitle used for
+    // level names/medals, and unlike sound-based signals it can only appear once the final
+    // medal has actually been processed, so it doesn't race with it.
+    @Inject(method = "setTitleText", at = @At("TAIL"))
+    private void injectSetTitleText(ClientboundSetTitleTextPacket clientboundSetTitleTextPacket, CallbackInfo ci) {
+        if (!MCCIState.INSTANCE.isOnIsland()) return;
+        if (MCCIState.INSTANCE.getGame() != Game.PARKOUR_WARRIOR_DOJO) return;
+        DojoSplitTimer instance = DojoSplitTimer.Companion.getInstance();
+        if (instance == null) return;
+        instance.handleTitle(clientboundSetTitleTextPacket.text().getString());
     }
 
     @Inject(method = "handleContainerSetSlot", at = @At("TAIL"))

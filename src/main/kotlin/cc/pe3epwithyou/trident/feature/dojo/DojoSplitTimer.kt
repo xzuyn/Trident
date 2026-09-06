@@ -112,6 +112,28 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
     }
 
+    /**
+     * "Run Complete!" arrives as a title (the big banner), not the subtitle used for level
+     * names/medals. Unlike a sound event, it can only appear once the final medal has actually
+     * been processed by the server, so it can't race with the medal subtitle and double-save
+     * the last split the way the round-end sound could.
+     */
+    fun handleTitle(text: String) {
+        if (isFinished) return
+        if (!text.contains("Run Complete", ignoreCase = true)) return
+        if (!isBetween) {
+            // The ending doesn't send its own short medal subtitle the way other levels do —
+            // this title is the only signal that it's done — so finalize it here, the same as
+            // modifyMedalTitle would: save it AND flip isBetween, so nothing downstream still
+            // thinks this segment is live and double-counts its contribution.
+            saveSplit()
+            isBetween = true
+        }
+        finish()
+        DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
+        Logger.debugLog("DojoSplitTimer - Run complete")
+    }
+
     private fun modifyMedalTitle(component: Component, ci: CallbackInfo) {
         var modified: MutableComponent = component.copy()
         if (Config.Dojo.showSplitImprovements) {
@@ -253,21 +275,15 @@ class DojoSplitTimer private constructor(val courseName: String?) {
             if (!Config.Dojo.enabled) return
             val soundLoc = packet.sound.value().location()
             val path = soundLoc.path
-            val isRoundEnd = path == "games.global.timer.round_end"
 
+            // Genuine completion is detected via the "Run Complete!" title instead (see
+            // handleTitle) — the round-end sound isn't used here anymore, since it can fire
+            // either before or after the final medal's subtitle and would race with it.
             if (path.contains("games.parkour_warrior.mode_swap") ||
                 path.contains("games.parkour_warrior.restart_course") ||
-                isRoundEnd ||
                 path == "ui.queue_teleport"
             ) {
-                val current = instance
-                // Only a fallback for a round ending abruptly before a final medal was ever
-                // detected. The normal case (medal -> then round-end sound) already saved this
-                // split via modifyMedalTitle, at which point isBetween is true — calling
-                // saveSplit() again here would double-save it, covering the gap between the
-                // medal and this sound as a bogus extra split.
-                if (current != null && isRoundEnd && !current.isBetween) current.saveSplit()
-                current?.finish()
+                instance?.finish()
                 DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
                 Logger.debugLog("DojoSplitTimer - Ended timer")
             } else if (path == "games.global.countdown.go") {

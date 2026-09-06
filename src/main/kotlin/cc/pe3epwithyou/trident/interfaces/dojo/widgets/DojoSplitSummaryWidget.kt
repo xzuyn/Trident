@@ -62,10 +62,15 @@ class DojoSplitSummaryWidget(
 
         val paceText = if (timer == null) "--" else {
             val completedActual = timer.completedSplits.sumOf { it.timeSeconds }
-            // Only counts once the transition has resolved into a known level (isBetween ==
-            // false) — before that we don't know which best to compare against, so hold
-            // steady rather than ticking up on an unresolved guess.
-            val currentContribution = if (!timer.isBetween) {
+            // Only counts a "current" contribution if the segment isn't already saved in
+            // completedSplits (defends against any state-transition path — e.g. an ending
+            // whose completion is only ever signaled by a title, not a medal subtitle — that
+            // might leave isBetween stuck false after already finalizing the segment; without
+            // this check that segment's time would be added twice) and the transition has
+            // resolved into a known level (isBetween == false) — before that we don't know
+            // which best to compare against, so hold steady rather than guessing.
+            val alreadyDoneCurrent = timer.completedSplits.any { it.levelUid == timer.currentLevelUid }
+            val currentContribution = if (!timer.isBetween && !alreadyDoneCurrent) {
                 val currentBest = bestFor(timer.currentLevelUid, timer.levelName)
                 val live = timer.currentSplitTimeSeconds()
                 if (currentBest != null) maxOf(currentBest, live) else live
