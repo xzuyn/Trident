@@ -274,6 +274,27 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     }
 
     /**
+     * The transition currently expected next, based on the last completed level and the
+     * currently configured route (see [buildCanonicalLevelNames]) — used to optimistically show
+     * a not-yet-confirmed transition as live before its destination subtitle actually arrives.
+     * Not a guarantee: if the player deviates from the planned route, the real transition (once
+     * confirmed by its subtitle) will simply differ from this, and nothing downstream keys off
+     * of it — it's purely a display prediction, never saved anywhere.
+     */
+    fun predictedNextTransitionUid(): String? {
+        val levels = buildCanonicalLevelNames()
+        val index = if (previousLevelName == "START") {
+            0
+        } else {
+            val previousIndex = levels.indexOf(previousLevelName)
+            if (previousIndex == -1) return null // previous level isn't even on the currently planned route
+            previousIndex + 1
+        }
+        if (index !in levels.indices) return null
+        return "${previousLevelName}_${levels[index]}"
+    }
+
+    /**
      * Compares the current split's elapsed time against the combined best (transition best +
      * level best). Only returns a value once both pieces have historical data — no partial
      * comparisons mid-run.

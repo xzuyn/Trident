@@ -20,7 +20,7 @@ enum class DojoSplitRowMode {
     /** Transition + level time summed into one row (the default, compact view). */
     COMBINED,
 
-    /** Just the unnamed transition leading into the level, e.g. "B1-3 → M1-1". Never shows as live — its identity isn't known until the level's own subtitle arrives. */
+    /** Just the unnamed transition leading into the level, e.g. "B1-3 → M1-1". Only ever shows as a route-based prediction (see DojoSplitTimer.predictedNextTransitionUid) before it's confirmed — its identity isn't truly known until the level's own subtitle arrives. */
     TRANSITION_ONLY,
 
     /** Just the level's own obstacle time, e.g. "M1-1" — identical no matter which transition led here. */
@@ -48,11 +48,20 @@ class DojoSplitRowWidget(
         val timer = DojoSplitTimer.instance
         val completedRow = timer?.completedSplits?.firstOrNull { it.levelUid == levelUid }
         // A transition's identity isn't known until the level subtitle arrives, at which point
-        // it's already finalized — so it's never shown as "live", only reached or not.
+        // it's already finalized — so it's never shown as "live" in the usual sense, only
+        // "reached" or "predicted" (see below) or not.
         val isActive = mode != DojoSplitRowMode.TRANSITION_ONLY &&
             timer != null && !timer.isBetween && timer.currentLevelUid == levelUid
+        // The route is known ahead of time (see Config.Dojo's route options), so while still in
+        // the unnamed gap before any level subtitle confirms anything, we can optimistically
+        // guess this is the transition currently in progress if the player is following the
+        // planned route. If a different level's subtitle ends up confirming a different
+        // transition, this naturally reverts to the normal "not reached" placeholder below
+        // on its own, since predictedNextTransitionUid() won't match this row anymore.
+        val isPredicted = mode == DojoSplitRowMode.TRANSITION_ONLY &&
+            timer != null && timer.isBetween && timer.predictedNextTransitionUid() == levelUid
 
-        if (isActive) {
+        if (isActive || isPredicted) {
             graphics.fillRoundedAll(x, y, width, HEIGHT, 0xFFFFFF opacity 24)
         }
 
@@ -96,6 +105,17 @@ class DojoSplitRowWidget(
                 delta = timer.resolvedTransitionImprovement()
                     ?.takeIf { Config.Dojo.showSplitImprovements && it >= Config.Dojo.showTimerImprovementAt }
                 live = false
+                reached = true
+            }
+
+            isPredicted -> {
+                name = fallbackName
+                val elapsed = timer!!.currentSplitTimeSeconds()
+                time = elapsed
+                val best = timer.courseName?.let { DojoSplitManager.getSplitSeconds(it, levelUid) }
+                delta = best?.let { elapsed - it }
+                    ?.takeIf { Config.Dojo.showSplitImprovements && it >= Config.Dojo.showTimerImprovementAt }
+                live = true
                 reached = true
             }
 

@@ -1,5 +1,7 @@
 package cc.pe3epwithyou.trident.feature.dojo
 
+import cc.pe3epwithyou.trident.config.Config
+
 /**
  * Every Parkour Warrior: Dojo course has the same fixed shape: 9 mandatory main-path
  * obstacles ("M1-1".."M3-3"), 3 optional bonus branches of 3 obstacles each ("B1-1".."B3-3"),
@@ -62,9 +64,10 @@ val ALWAYS_SEPARATE_TRANSITIONS: Set<String> = setOf(
     "START_M1-1",
     "M1-3_M2-1",
     "M2-3_M3-1",
-    "M3-3_B4-1",
-    "M3-3_B4-2",
-    "M3-3_B4-3",
+    // ENDINGS
+    "M3-3_B4-1",  //EASY
+    "M3-3_B4-2",  //MEDIUM
+    "M3-3_B4-3",  //HARD
     //BONUS 1
     "START_B1-1",
     "B1-3_M1-1",
@@ -73,5 +76,27 @@ val ALWAYS_SEPARATE_TRANSITIONS: Set<String> = setOf(
     "B2-3_M2-1",
     //BONUS 3
     "M2-3_B3-1",
-    "B3-3_M3-1",
+    "B3-3_M3-1"
 )
+
+/**
+ * The flat sequence of level names for the currently configured route (see [cc.pe3epwithyou.trident.config.Config.Dojo]'s
+ * route options). Used both to build the split list and to predict which transition is
+ * currently in progress before it's confirmed by the next level's subtitle.
+ */
+fun buildCanonicalLevelNames(): List<String> = buildList {
+    val dojo = Config.Dojo
+    if (dojo.routeBonus1) addAll(listOf("B1-1", "B1-2", "B1-3"))
+    addAll(listOf("M1-1", "M1-2", "M1-3"))
+    if (dojo.routeBonus2) addAll(listOf("B2-1", "B2-2", "B2-3"))
+    addAll(listOf("M2-1", "M2-2", "M2-3"))
+    if (dojo.routeBonus3) addAll(listOf("B3-1", "B3-2", "B3-3"))
+    addAll(listOf("M3-1", "M3-2", "M3-3"))
+    add(
+        when (dojo.routeEnding) {
+            DojoEnding.EASY -> "B4-1"
+            DojoEnding.MEDIUM -> "B4-2"
+            DojoEnding.HARD -> "B4-3"
+        }
+    )
+}

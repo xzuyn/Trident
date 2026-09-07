@@ -1,11 +1,9 @@
 package cc.pe3epwithyou.trident.interfaces.dojo
 
-import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.dojo.ALWAYS_SEPARATE_TRANSITIONS
-import cc.pe3epwithyou.trident.feature.dojo.DojoEnding
-import cc.pe3epwithyou.trident.feature.dojo.DojoSectionGroup
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
+import cc.pe3epwithyou.trident.feature.dojo.buildCanonicalLevelNames
 import cc.pe3epwithyou.trident.feature.dojo.classifyDojoSection
 import cc.pe3epwithyou.trident.feature.dojo.group
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitDividerWidget
@@ -35,6 +33,9 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
         private val TITLE_COLOR: Int = 0x038AFF opacity 127
     }
 
+    /** One row to be drawn, with the identity it should be shown/matched under and the visual group it belongs to (for divider placement). */
+    private data class RenderRow(val uid: String, val name: String, val mode: DojoSplitRowMode, val groupKey: Any)
+
     private fun getTitleWidget(): DojoDialogTitle {
         val title = FontCollection.get("_fonts/icon/quest_log.png").withStyle(
             Style.EMPTY.withoutShadow()
@@ -54,23 +55,8 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
      * of time.
      */
     private fun buildCanonicalOrder(): List<Pair<String, String>> {
-        val levels = buildList {
-            if (Config.Dojo.routeBonus1) addAll(listOf("B1-1", "B1-2", "B1-3"))
-            addAll(listOf("M1-1", "M1-2", "M1-3"))
-            if (Config.Dojo.routeBonus2) addAll(listOf("B2-1", "B2-2", "B2-3"))
-            addAll(listOf("M2-1", "M2-2", "M2-3"))
-            if (Config.Dojo.routeBonus3) addAll(listOf("B3-1", "B3-2", "B3-3"))
-            addAll(listOf("M3-1", "M3-2", "M3-3"))
-            add(
-                when (Config.Dojo.routeEnding) {
-                    DojoEnding.EASY -> "B4-1"
-                    DojoEnding.MEDIUM -> "B4-2"
-                    DojoEnding.HARD -> "B4-3"
-                }
-            )
-        }
         var previous = "START"
-        return levels.map { name ->
+        return buildCanonicalLevelNames().map { name ->
             val uid = "${previous}_$name"
             previous = name
             uid to name
@@ -112,20 +98,29 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
             }
         }
 
-        var previousGroup: DojoSectionGroup? = null
+        // Transitions worth their own row get a unique group key (their own uid), so a divider
+        // always forms on both sides of them — isolating them as their own single-row section
+        // — regardless of whether the level before/after happens to share a visual group (e.g.
+        // "M2-3 -> M3-1" would otherwise sit with no divider at all, since M2 and M3 both
+        // classify as the same plain MAIN group).
+        val renderRows = mutableListOf<RenderRow>()
         orderedRows.forEach { (uid, name) ->
-            val currentGroup = classifyDojoSection(name).group()
-            if (previousGroup != null && currentGroup != previousGroup) {
+            if (uid in ALWAYS_SEPARATE_TRANSITIONS) {
+                renderRows.add(RenderRow(uid, name, DojoSplitRowMode.TRANSITION_ONLY, uid))
+                renderRows.add(RenderRow(uid, name, DojoSplitRowMode.LEVEL_ONLY, classifyDojoSection(name).group()))
+            } else {
+                renderRows.add(RenderRow(uid, name, DojoSplitRowMode.COMBINED, classifyDojoSection(name).group()))
+            }
+        }
+
+        var previousGroupKey: Any? = null
+        renderRows.forEach { row ->
+            if (previousGroupKey != null && row.groupKey != previousGroupKey) {
                 DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
             }
-            previousGroup = currentGroup
+            previousGroupKey = row.groupKey
 
-            if (uid in ALWAYS_SEPARATE_TRANSITIONS) {
-                DojoSplitRowWidget(uid, name, CONTENT_WIDTH, DojoSplitRowMode.TRANSITION_ONLY).atBottom(0, settings = LayoutConstants.LEFT)
-                DojoSplitRowWidget(uid, name, CONTENT_WIDTH, DojoSplitRowMode.LEVEL_ONLY).atBottom(0, settings = LayoutConstants.LEFT)
-            } else {
-                DojoSplitRowWidget(uid, name, CONTENT_WIDTH, DojoSplitRowMode.COMBINED).atBottom(0, settings = LayoutConstants.LEFT)
-            }
+            DojoSplitRowWidget(row.uid, row.name, CONTENT_WIDTH, row.mode).atBottom(0, settings = LayoutConstants.LEFT)
         }
 
         DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
