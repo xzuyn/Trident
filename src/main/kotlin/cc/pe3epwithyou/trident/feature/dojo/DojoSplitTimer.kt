@@ -256,6 +256,24 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     }
 
     /**
+     * The transition's time is actually fixed the moment the level's subtitle arrives — it
+     * doesn't change further while the level itself is still being played. Null before that
+     * point (still in the unnamed transition, or between splits entirely).
+     */
+    fun resolvedTransitionSeconds(): Double? {
+        val levelStart = levelStartTimestamp ?: return null
+        return (levelStart - transitionStartTimestamp) / 1000.0
+    }
+
+    /** Like [resolvedTransitionSeconds], but compared against the transition's own historical best. */
+    fun resolvedTransitionImprovement(): Double? {
+        val course = courseName ?: return null
+        val resolved = resolvedTransitionSeconds() ?: return null
+        val transitionBest = DojoSplitManager.getSplitSeconds(course, currentLevelUid) ?: return null
+        return resolved - transitionBest
+    }
+
+    /**
      * Compares the current split's elapsed time against the combined best (transition best +
      * level best). Only returns a value once both pieces have historical data — no partial
      * comparisons mid-run.

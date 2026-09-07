@@ -85,6 +85,20 @@ class DojoSplitRowWidget(
                 }
             }
 
+            // The transition into this level has already finished (its subtitle arrived),
+            // even though the level itself — and therefore the whole combined split — hasn't
+            // finished yet, so there's no completedRow for it to read from above. The
+            // transition's own time is fixed the moment the level starts, so show it now
+            // rather than waiting for the level to also finish.
+            mode == DojoSplitRowMode.TRANSITION_ONLY && timer != null && !timer.isBetween && timer.currentLevelUid == levelUid -> {
+                name = fallbackName
+                time = timer.resolvedTransitionSeconds()
+                delta = timer.resolvedTransitionImprovement()
+                    ?.takeIf { Config.Dojo.showSplitImprovements && it >= Config.Dojo.showTimerImprovementAt }
+                live = false
+                reached = true
+            }
+
             isActive -> {
                 name = timer!!.levelName
                 live = true
