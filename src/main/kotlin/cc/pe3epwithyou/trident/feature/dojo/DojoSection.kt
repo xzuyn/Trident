@@ -58,14 +58,20 @@ fun classifyDojoSection(levelName: String): DojoSection {
  * obstacles that are always run back-to-back, and stays merged into the level's own row.
  */
 val ALWAYS_SEPARATE_TRANSITIONS: Set<String> = setOf(
+    //MAIN ROUTE
     "START_M1-1",
-    "START_B1-1",
-    "B1-3_M1-1",
-    "B2-3_M2-1",
-    "B3-3_M3-1",
     "M1-3_M2-1",
     "M2-3_M3-1",
     "M3-3_B4-1",
     "M3-3_B4-2",
-    "M3-3_B4-3"
+    "M3-3_B4-3",
+    //BONUS 1
+    "START_B1-1",
+    "B1-3_M1-1",
+    //BONUS 2
+    "M1-3_B2-1",
+    "B2-3_M2-1",
+    //BONUS 3
+    "M2-3_B3-1",
+    "B3-3_M3-1",
 )
