@@ -29,15 +29,20 @@ const val DOJO_SPLITS_DIALOG_KEY = "dojo_splits"
  * [levelUid] is a composite `origin_destination` key (e.g. `"START_M1-1"`, `"B1-3_M1-1"`) — the
  * unnamed transition leading into a level takes a genuinely different amount of time depending
  * on where you came from, so it's tracked and saved separately from the level's own obstacle
- * time (which is identical no matter the route). [timeSeconds] is the two combined, since
- * that's what's actually displayed as this row's split time.
+ * time (which is identical no matter the route). [transitionSeconds] and [levelSeconds] are
+ * kept apart (not just summed) so they can optionally be shown as their own rows.
  */
 data class DojoSplitRow(
     val levelUid: String,
     val levelName: String,
-    val timeSeconds: Double,
-    val deltaSeconds: Double?
-)
+    val transitionSeconds: Double,
+    val levelSeconds: Double,
+    val transitionDelta: Double?,
+    val levelDelta: Double?
+) {
+    val timeSeconds: Double get() = transitionSeconds + levelSeconds
+    val deltaSeconds: Double? get() = if (transitionDelta != null && levelDelta != null) transitionDelta + levelDelta else null
+}
 
 /**
  * Tracks split times for a single Parkour Warrior: Dojo run.
@@ -163,14 +168,19 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val now = finishTimestamp ?: System.currentTimeMillis()
         val transitionSeconds = (levelStart - transitionStartTimestamp) / 1000.0
         val levelSeconds = (now - levelStart) / 1000.0
-        val totalSeconds = transitionSeconds + levelSeconds
 
         val finishedUid = currentLevelUid
         val finishedName = levelName
-        val delta = if (Config.Dojo.showSplitImprovements) splitImprovement() else null
-        completedSplits.add(DojoSplitRow(finishedUid, finishedName, totalSeconds, delta))
 
-        sendSplitCompleteMessage(totalSeconds, delta)
+        val transitionBest = if (Config.Dojo.showSplitImprovements) DojoSplitManager.getSplitSeconds(course, finishedUid) else null
+        val levelBest = if (Config.Dojo.showSplitImprovements) DojoSplitManager.getSplitSeconds(course, finishedName) else null
+        val transitionDelta = transitionBest?.let { transitionSeconds - it }
+        val levelDelta = levelBest?.let { levelSeconds - it }
+
+        val row = DojoSplitRow(finishedUid, finishedName, transitionSeconds, levelSeconds, transitionDelta, levelDelta)
+        completedSplits.add(row)
+
+        sendSplitCompleteMessage(row.timeSeconds, row.deltaSeconds)
 
         // Saved as two separate historical records under different keys: the transition
         // (route-specific — depends on where you came from) and the level itself
@@ -236,6 +246,16 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     fun totalElapsedSeconds(): Double = ((finishTimestamp ?: System.currentTimeMillis()) - runStartTimestamp) / 1000.0
 
     /**
+     * Live elapsed time for just the level (obstacle) portion of the split currently in
+     * progress — null while still in the unnamed transition, since the boundary (and
+     * therefore this level's identity) isn't known yet.
+     */
+    fun currentLevelPhaseSeconds(): Double? {
+        val levelStart = levelStartTimestamp ?: return null
+        return ((finishTimestamp ?: System.currentTimeMillis()) - levelStart) / 1000.0
+    }
+
+    /**
      * Compares the current split's elapsed time against the combined best (transition best +
      * level best). Only returns a value once both pieces have historical data — no partial
      * comparisons mid-run.
@@ -245,6 +265,14 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val transitionBest = DojoSplitManager.getSplitSeconds(course, currentLevelUid) ?: return null
         val levelBest = DojoSplitManager.getSplitSeconds(course, levelName) ?: return null
         return currentSplitTimeSeconds() - (transitionBest + levelBest)
+    }
+
+    /** Like [splitImprovement], but comparing only the level (obstacle) portion in progress. */
+    fun levelPhaseImprovement(): Double? {
+        val course = courseName ?: return null
+        val levelPhase = currentLevelPhaseSeconds() ?: return null
+        val levelBest = DojoSplitManager.getSplitSeconds(course, levelName) ?: return null
+        return levelPhase - levelBest
     }
 
     /** Freezes this run's clocks in place. Called on round end — the timer keeps existing (and displaying) until a new run starts. */

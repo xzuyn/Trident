@@ -1,6 +1,7 @@
 package cc.pe3epwithyou.trident.interfaces.dojo
 
 import cc.pe3epwithyou.trident.config.Config
+import cc.pe3epwithyou.trident.feature.dojo.ALWAYS_SEPARATE_TRANSITIONS
 import cc.pe3epwithyou.trident.feature.dojo.DojoEnding
 import cc.pe3epwithyou.trident.feature.dojo.DojoSectionGroup
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
@@ -8,6 +9,7 @@ import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.dojo.classifyDojoSection
 import cc.pe3epwithyou.trident.feature.dojo.group
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitDividerWidget
+import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitRowMode
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitRowWidget
 import cc.pe3epwithyou.trident.interfaces.dojo.widgets.DojoSplitSummaryWidget
 import cc.pe3epwithyou.trident.interfaces.shared.TridentDialog
@@ -118,7 +120,12 @@ class DojoSplitsDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
             }
             previousGroup = currentGroup
 
-            DojoSplitRowWidget(uid, name, CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)
+            if (uid in ALWAYS_SEPARATE_TRANSITIONS) {
+                DojoSplitRowWidget(uid, name, CONTENT_WIDTH, DojoSplitRowMode.TRANSITION_ONLY).atBottom(0, settings = LayoutConstants.LEFT)
+                DojoSplitRowWidget(uid, name, CONTENT_WIDTH, DojoSplitRowMode.LEVEL_ONLY).atBottom(0, settings = LayoutConstants.LEFT)
+            } else {
+                DojoSplitRowWidget(uid, name, CONTENT_WIDTH, DojoSplitRowMode.COMBINED).atBottom(0, settings = LayoutConstants.LEFT)
+            }
         }
 
         DojoSplitDividerWidget(CONTENT_WIDTH).atBottom(0, settings = LayoutConstants.LEFT)

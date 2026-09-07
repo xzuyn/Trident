@@ -49,3 +49,23 @@ fun classifyDojoSection(levelName: String): DojoSection {
         else -> DojoSection.MAIN
     }
 }
+
+/**
+ * Transitions worth showing as their own split rather than merging into the level that
+ * follows: the choice points where a bonus branch could be taken instead of continuing on the
+ * main path, the returns from each bonus branch back onto the main path, and the final choice
+ * of ending. Every other transition is a short, fixed "connecting section" between two
+ * obstacles that are always run back-to-back, and stays merged into the level's own row.
+ */
+val ALWAYS_SEPARATE_TRANSITIONS: Set<String> = setOf(
+    "START_M1-1",
+    "START_B1-1",
+    "B1-3_M1-1",
+    "B2-3_M2-1",
+    "B3-3_M3-1",
+    "M1-3_M2-1",
+    "M2-3_M3-1",
+    "M3-3_B4-1",
+    "M3-3_B4-2",
+    "M3-3_B4-3"
+)

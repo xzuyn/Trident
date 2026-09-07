@@ -45,9 +45,10 @@ object DojoSplitManager {
 
     fun saveSplit(courseName: String, levelUid: String, levelName: String, timeMillis: Long) {
         val splits = getCourseSplits(courseName)
-        splits.levels[levelUid] = splits.levels[levelUid]?.addTime(timeMillis) ?: DojoSplit(timeMillis, timeMillis.toDouble())
+        val updated = splits.levels[levelUid]?.addTime(timeMillis) ?: DojoSplit(timeMillis, timeMillis.toDouble())
+        splits.levels[levelUid] = updated
         splits.levelNames[levelUid] = levelName
-        Logger.debugLog("DojoSplitManager - Time (${timeMillis}ms) was saved with uid: $levelUid")
+        Logger.debugLog("DojoSplitManager - Saved ${timeMillis}ms for '$levelUid' -> best is now ${updated.best}ms (avg ${updated.avg}ms, count ${updated.count})")
         PlayerStateIO.save()
     }
 
