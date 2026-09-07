@@ -1,6 +1,6 @@
 package cc.pe3epwithyou.trident.mixin.connection;
 
-import cc.pe3epwithyou.trident.client.PacketHandler;
+import cc.pe3epwithyou.trident.client.packet.PacketManager;
 import cc.pe3epwithyou.trident.state.MCCIState;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.client.Minecraft;
@@ -42,6 +42,6 @@ public abstract class ConnectionMixin {
 
     @Inject(at = @At("HEAD"), method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V", cancellable = true)
     public void trident$channelRead(ChannelHandlerContext ctx, Packet<?> packet, CallbackInfo ci) {
-        PacketHandler.handle(packet, ci);
+        PacketManager.processMinecraftPacket(packet, ci);
     }
 }
