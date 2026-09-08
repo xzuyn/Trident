@@ -1,6 +1,6 @@
 package cc.pe3epwithyou.trident.mixin.connection;
 
-import cc.pe3epwithyou.trident.client.PacketHandler;
+import cc.pe3epwithyou.trident.client.packet.PacketManager;
 import cc.pe3epwithyou.trident.state.MCCIState;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.client.Minecraft;
@@ -27,7 +27,7 @@ public abstract class ConnectionMixin {
     private volatile @Nullable PacketListener packetListener;
 
     @Inject(method = "disconnect(Lnet/minecraft/network/chat/Component;)V", at = @At("TAIL"))
-    private void injectDisconnect(Component component, CallbackInfo ci) {
+    private void trident$disconnect(Component reason, CallbackInfo ci) {
         SocketAddress remoteAddress = getRemoteAddress();
         if (remoteAddress == null) return;
         if (remoteAddress instanceof InetSocketAddress inetSocketAddress) {
@@ -41,7 +41,7 @@ public abstract class ConnectionMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V", cancellable = true)
-    public void injectChannelRead(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
-        PacketHandler.handle(packet, ci);
+    public void trident$channelRead(ChannelHandlerContext ctx, Packet<?> packet, CallbackInfo ci) {
+        PacketManager.processMinecraftPacket(packet, ci);
     }
 }

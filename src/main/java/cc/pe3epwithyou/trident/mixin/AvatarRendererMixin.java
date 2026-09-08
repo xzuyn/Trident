@@ -19,7 +19,7 @@ public abstract class AvatarRendererMixin extends LivingEntityRenderer<AbstractC
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void init(EntityRendererProvider.Context context, boolean bl, CallbackInfo ci) {
+    public void trident$init(EntityRendererProvider.Context context, boolean slimSteve, CallbackInfo ci) {
         this.addLayer(new BackRenderLayer(this, context));
     }
 }

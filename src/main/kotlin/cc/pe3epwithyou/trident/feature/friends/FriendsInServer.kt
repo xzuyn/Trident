@@ -1,5 +1,6 @@
 package cc.pe3epwithyou.trident.feature.friends
 
+import cc.pe3epwithyou.trident.client.packet.PacketHandler
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.state.Game
@@ -12,6 +13,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.ClientboundTabListPacket
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 object FriendsInServer {
     private val regex = Regex("""(?:INSTANCE|FISHTANCE) ([a-zA-Z0-9]+)""")
@@ -22,16 +24,22 @@ object FriendsInServer {
 
     fun request() = SuggestionPacket.requestSuggestions("/friend remove ", ::updateFriendsList)
 
-    fun processTabPacket(packet: Packet<*>) {
-        if (packet !is ClientboundTabListPacket) return
-        val match = regex.find(packet.footer.string)
-        if (match != null) {
-            val instance = match.groups[1]?.value
-            prevInstance = currentInstance
-            currentInstance = instance
-        } else {
-            prevInstance = null
-            currentInstance = null
+    class TabListPacketHandler : PacketHandler {
+        override fun check(packet: Packet<*>): Boolean = packet is ClientboundTabListPacket
+
+        override fun handle(
+            packet: Packet<*>, ci: CallbackInfo
+        ) {
+            require(packet is ClientboundTabListPacket)
+            val match = regex.find(packet.footer.string)
+            if (match != null) {
+                val instance = match.groups[1]?.value
+                prevInstance = currentInstance
+                currentInstance = instance
+            } else {
+                prevInstance = null
+                currentInstance = null
+            }
         }
     }
 

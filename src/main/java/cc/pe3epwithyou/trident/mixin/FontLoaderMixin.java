@@ -11,17 +11,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BitmapProvider.Definition.class)
 public class FontLoaderMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void init(Identifier resourceLocation, int height, int ascent, int[][] chars, CallbackInfo ci) {
-        String namespace = resourceLocation.getNamespace();
-        String path = resourceLocation.getPath();
+    private void trident$init(Identifier file, int height, int ascent, int[][] codepointGrid, CallbackInfo ci) {
+        String namespace = file.getNamespace();
+        String path = file.getPath();
         if (!namespace.equals("mcc") || !path.startsWith("_fonts/")) return;
-        int[] c = chars[0];
+        int[] c = codepointGrid[0];
         StringBuilder builder = new StringBuilder();
         for (int point : c) {
             builder.appendCodePoint(point);
         }
 
         String character = builder.toString();
-        FontCollection.INSTANCE.loadDefinition(resourceLocation, character, ascent, height);
+        FontCollection.INSTANCE.loadDefinition(file, character, ascent, height);
     }
 }

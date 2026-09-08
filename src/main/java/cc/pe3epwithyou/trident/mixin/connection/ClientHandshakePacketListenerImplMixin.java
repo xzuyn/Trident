@@ -20,7 +20,7 @@ public class ClientHandshakePacketListenerImplMixin {
     private @Nullable ServerData serverData;
 
     @Inject(method = "handleLoginFinished", at = @At("HEAD"))
-    private void injectHandleLoginFinished(ClientboundLoginFinishedPacket clientboundLoginFinishedPacket, CallbackInfo ci) {
+    private void trident$handleLoginFinished(ClientboundLoginFinishedPacket packet, CallbackInfo ci) {
         DialogCollection.INSTANCE.clear();
         if (this.serverData == null) return;
         if (!this.serverData.ip.toLowerCase().contains("mccisland.net")) return;

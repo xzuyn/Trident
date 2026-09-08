@@ -1,5 +1,6 @@
 package cc.pe3epwithyou.trident.utils
 
+import cc.pe3epwithyou.trident.client.packet.PacketHandler
 import cc.pe3epwithyou.trident.state.MCCIState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,7 @@ object SuggestionPacket {
     val tasks: ConcurrentHashMap<Int, SuggestionTask> = ConcurrentHashMap()
 
     data class SuggestionTask(val id: Int, val callback: (List<String>) -> Unit) {
-        fun handle(strings: List<String>) = minecraft().execute { callback(strings) }
+        fun processSuggestions(strings: List<String>) = minecraft().execute { callback(strings) }
     }
 
     fun requestSuggestions(command: String, callback: (List<String>) -> Unit) {
@@ -29,15 +30,22 @@ object SuggestionPacket {
             delay(1_500)
             val task = tasks.remove(id) ?: return@launch
             Logger.debugLog("Failed to get suggestions for command $command")
-            task.handle(emptyList())
+            task.processSuggestions(emptyList())
         }
     }
 
-    fun handlePacket(packet: Packet<*>, ci: CallbackInfo) {
-        if (packet !is ClientboundCommandSuggestionsPacket) return
-        val task = tasks.remove(packet.id) ?: return
-        ci.cancel()
-        task.handle(packet.suggestions.map { it.text })
+    class CommandSuggestionsPacketHandler : PacketHandler {
+        override fun check(packet: Packet<*>): Boolean =
+            packet is ClientboundCommandSuggestionsPacket
+
+        override fun handle(
+            packet: Packet<*>, ci: CallbackInfo
+        ) {
+            require(packet is ClientboundCommandSuggestionsPacket)
+            val task = tasks.remove(packet.id) ?: return
+            ci.cancel()
+            task.processSuggestions(packet.suggestions.map { it.text })
+        }
     }
 
     private fun sendPacket(id: Int, command: String) {
