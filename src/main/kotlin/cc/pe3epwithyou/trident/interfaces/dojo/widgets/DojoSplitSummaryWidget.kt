@@ -2,6 +2,7 @@ package cc.pe3epwithyou.trident.interfaces.dojo.widgets
 
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
+import cc.pe3epwithyou.trident.utils.extensions.ComponentExtensions.mccFont
 import cc.pe3epwithyou.trident.utils.minecraft
 import com.noxcrew.sheeplib.util.opaqueColor
 import net.minecraft.ChatFormatting
@@ -28,9 +29,9 @@ class DojoSplitSummaryWidget(
     width: Int
 ) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
-        const val HEIGHT = 22
-        private const val PADDING = 5
-        private const val LINE_HEIGHT = 11
+        const val HEIGHT = 18
+        private const val PADDING = 4
+        private const val LINE_HEIGHT = 9
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -79,13 +80,13 @@ class DojoSplitSummaryWidget(
             val paceSeconds = completedActual + currentContribution + afterCurrentBest
             formatTime(paceSeconds) + (if (!afterCurrentKnown) "+" else "")
         }
-        val paceLabel = Component.literal("CURRENT PACE ").withStyle(ChatFormatting.GRAY)
-            .append(Component.literal(paceText).withStyle(if (timer == null) ChatFormatting.DARK_GRAY else ChatFormatting.WHITE))
+        val paceLabel = Component.literal("CURRENT PACE ").withStyle(ChatFormatting.GRAY).mccFont()
+            .append(Component.literal(paceText).withStyle(if (timer == null) ChatFormatting.DARK_GRAY else ChatFormatting.WHITE).mccFont())
         graphics.text(font, paceLabel, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         val bestText = formatTime(totalBest) + (if (!totalKnown) "+" else "")
-        val bestLabel = Component.literal("SUM OF BEST ").withStyle(ChatFormatting.GRAY)
-            .append(Component.literal(bestText).withStyle(ChatFormatting.WHITE))
+        val bestLabel = Component.literal("SUM OF BEST ").withStyle(ChatFormatting.GRAY).mccFont()
+            .append(Component.literal(bestText).withStyle(ChatFormatting.WHITE).mccFont())
         graphics.text(font, bestLabel, x + PADDING, y + LINE_HEIGHT + 1, 0xFFFFFF.opaqueColor())
     }
 

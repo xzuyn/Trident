@@ -5,6 +5,7 @@ import cc.pe3epwithyou.trident.feature.dojo.DojoSection
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.dojo.classifyDojoSection
+import cc.pe3epwithyou.trident.utils.extensions.ComponentExtensions.mccFont
 import cc.pe3epwithyou.trident.utils.extensions.GraphicsExtensions.fillRoundedAll
 import cc.pe3epwithyou.trident.utils.minecraft
 import com.noxcrew.sheeplib.util.opaqueColor
@@ -38,9 +39,9 @@ class DojoSplitRowWidget(
     private val mode: DojoSplitRowMode = DojoSplitRowMode.COMBINED
 ) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
-        const val HEIGHT = 11
-        private const val PADDING = 5
-        private const val GAP = 5
+        const val HEIGHT = 9
+        private const val PADDING = 4
+        private const val GAP = 3
     }
 
     override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -160,19 +161,19 @@ class DojoSplitRowWidget(
             else -> ChatFormatting.DARK_GRAY
         }
         val displayed = if (mode == DojoSplitRowMode.TRANSITION_ONLY) transitionDisplayName() else displayName(name)
-        val nameComponent = Component.literal(displayed).withStyle(nameColor)
+        val nameComponent = Component.literal(displayed).withStyle(nameColor).mccFont()
         graphics.text(font, nameComponent, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         val timeText = if (time != null) String.format("%.3f", time) else "--.---"
         val timeColor = if (reached) ChatFormatting.WHITE else ChatFormatting.DARK_GRAY
-        val timeComponent = Component.literal(timeText).withStyle(timeColor)
+        val timeComponent = Component.literal(timeText).withStyle(timeColor).mccFont()
         val timeWidth = font.width(timeComponent)
         graphics.text(font, timeComponent, x + width - timeWidth - PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         if (delta == null) return
         val deltaColor = if (delta > 0) ChatFormatting.RED else ChatFormatting.GREEN
         val sign = if (delta > 0) "+" else ""
-        val deltaComponent = Component.literal("$sign${String.format("%.2f", delta)}").withStyle(deltaColor)
+        val deltaComponent = Component.literal("$sign${String.format("%.2f", delta)}").withStyle(deltaColor).mccFont()
         val deltaWidth = font.width(deltaComponent)
         graphics.text(font, deltaComponent, x + width - timeWidth - deltaWidth - PADDING - GAP, y + 1, 0xFFFFFF.opaqueColor())
     }

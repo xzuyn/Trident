@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component
  */
 class DojoSplitDividerWidget(width: Int) : AbstractWidget(0, 0, width, HEIGHT, Component.empty()) {
     companion object {
-        const val HEIGHT = 5
+        const val HEIGHT = 3
         private const val MARGIN = 4
     }
 
