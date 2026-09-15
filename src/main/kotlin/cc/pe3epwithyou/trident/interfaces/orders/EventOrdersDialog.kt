@@ -61,12 +61,8 @@ class EventOrdersDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
             return@grid
         }
 
-        val orders = eventOrders.orders.sortedBy { it.isComplete }
-        orders.forEachIndexed { index, order ->
+        eventOrders.orders.sortedBy { it.isComplete }.forEach { order ->
             OrderWidget(order, this@EventOrdersDialog).atBottom(0, settings = LayoutConstants.LEFT)
-            if (index != orders.lastIndex) {
-                StringWidget(Component.empty(), mcFont).atBottom(0, settings = LayoutConstants.LEFT)
-            }
         }
     }
 

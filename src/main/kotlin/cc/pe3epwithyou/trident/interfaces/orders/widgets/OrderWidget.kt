@@ -16,15 +16,20 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.network.chat.Component
 
+/**
+ * Renders a single Event Order: a rarity-coloured header line followed by one line per
+ * fish requirement. Reuses the same quest-log icon set as [cc.pe3epwithyou.trident.interfaces.questing.widgets.QuestWidget]
+ * for the header icon, since those are the only per-rarity inline sprites known to render correctly.
+ */
 class OrderWidget(
     order: Order,
     themed: Themed
 ) : CompoundWidget(0, 0, 0, 0) {
     companion object {
         private const val COMPLETE_COLOR: Int = 0x80ff82
-        private const val ORDER_ICON = "_fonts/icon/quest_log.png"
+        private const val QUEST_ICON_DIRECTORY = "island_interface/quest_log/daily/"
         private const val COMPLETE_ICON = "island_interface/generic/accept"
-        private const val BAR_WIDTH = 15
+        private const val BAR_WIDTH = 10
     }
 
     override fun getWidth(): Int = layout.width
@@ -34,7 +39,9 @@ class OrderWidget(
         val mcFont = minecraft().font
         val isComplete = order.isComplete
 
-        val icon = FontCollection.texture(if (isComplete) COMPLETE_ICON else ORDER_ICON).offset(y = 1f)
+        val iconPath = if (isComplete) COMPLETE_ICON else "$QUEST_ICON_DIRECTORY${order.rarity.name.lowercase()}"
+        val icon = FontCollection.texture(iconPath).offset(y = 1f)
+
         val headerText = if (isComplete) "ORDER COMPLETE" else "${order.rarity.name} ORDER"
         val header = Component.literal(headerText.uppercase())
             .mccFont()

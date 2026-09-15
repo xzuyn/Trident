@@ -4,7 +4,9 @@ import cc.pe3epwithyou.trident.state.Order
 import cc.pe3epwithyou.trident.state.OrderRequirement
 import cc.pe3epwithyou.trident.state.OrderReward
 import cc.pe3epwithyou.trident.state.Rarity
+import cc.pe3epwithyou.trident.utils.Logger
 import cc.pe3epwithyou.trident.utils.extensions.ItemStackExtensions.getLore
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.TextColor
 import net.minecraft.world.item.ItemStack
@@ -26,7 +28,7 @@ object OrderParser {
         val lore = loreComponents.map { it.string }
         if (lore.none { it.contains("Order Requirements:", ignoreCase = true) }) return null
 
-        val rarity = detectRarity(loreComponents)
+        val rarity = detectRarity(item, loreComponents)
 
         val requirements = mutableListOf<OrderRequirement>()
         val rewards = mutableListOf<OrderReward>()
@@ -72,11 +74,17 @@ object OrderParser {
     }
 
     /**
-     * Detects an order's rarity primarily by matching the text color of a lore line against
-     * the known [Rarity] colors (mirrors [Rarity.getFromItem]), falling back to matching the
-     * rarity's name as plain text (e.g. a lore line that just reads "UNCOMMON").
+     * Detects an order's rarity the same way [cc.pe3epwithyou.trident.feature.questing.QuestingParser]
+     * does for quest items: by reading the trailing segment of the item's model path
+     * (e.g. ".../common", ".../uncommon"). Falls back to lore-based detection (text color, then
+     * plain text match) if the model path doesn't resolve to a known rarity.
      */
-    private fun detectRarity(lore: List<Component>): Rarity {
+    private fun detectRarity(item: ItemStack, lore: List<Component>): Rarity {
+        val modelSuffix = item.get(DataComponents.ITEM_MODEL)?.path?.substringAfterLast('/')?.lowercase()
+        Rarity.entries.find { it.name.lowercase() == modelSuffix }?.let { return it }
+
+        Logger.debugLog("Event order rarity model path did not match a known rarity: $modelSuffix")
+
         lore.forEach { component ->
             val color = component.style.color ?: return@forEach
             Rarity.entries.find { TextColor.fromRgb(it.color) == color }?.let { return it }
@@ -89,4 +97,3 @@ object OrderParser {
         return Rarity.COMMON
     }
 }
-

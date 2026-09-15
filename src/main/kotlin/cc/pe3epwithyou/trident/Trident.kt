@@ -150,7 +150,9 @@ class Trident : ModInitializer {
             if (!MCCIState.isOnIsland()) return@register
             val k = OrderStorage.DIALOG_KEY
             if (Config.Fishing.eventOrdersModule && MCCIState.isOnSeaMonstersIsland()) {
-                DialogCollection.open(k, EventOrdersDialog(10, 10, k))
+                if (DialogCollection.get(k) == null) {
+                    DialogCollection.open(k, EventOrdersDialog(10, 10, k))
+                }
             } else {
                 DialogCollection.close(k)
             }
