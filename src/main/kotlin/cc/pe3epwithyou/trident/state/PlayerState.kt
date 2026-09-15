@@ -118,6 +118,36 @@ data class FishingResearch(
 )
 
 @Serializable
+data class OrderRequirement(
+    var fishName: String,
+    var current: Int,
+    var total: Int,
+)
+
+@Serializable
+data class OrderReward(
+    var name: String,
+    var amount: Int,
+)
+
+@Serializable
+data class Order(
+    var rarity: Rarity = Rarity.COMMON,
+    var requirements: MutableList<OrderRequirement> = mutableListOf(),
+    var rewards: MutableList<OrderReward> = mutableListOf(),
+    var slot: Int = -1,
+) {
+    val isComplete: Boolean
+        get() = requirements.isNotEmpty() && requirements.all { it.current >= it.total }
+}
+
+@Serializable
+data class EventOrders(
+    var orders: MutableList<Order> = mutableListOf(),
+    var needsUpdating: Boolean = true,
+)
+
+@Serializable
 data class Rank(val name: String, val image: String)
 
 @Serializable
@@ -150,6 +180,7 @@ data class PlayerState(
     var supplies: Supplies = Supplies(),
     var wayfinderData: WayfinderData = WayfinderData(),
     var fishingResearch: FishingResearch = FishingResearch(),
+    var eventOrders: EventOrders = EventOrders(),
     var hatesUpdates: Boolean = false,
     var arenaData: ArenaData = ArenaData(),
     var levelData: CrownLevel? = null,

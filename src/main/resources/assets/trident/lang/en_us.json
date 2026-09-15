@@ -86,6 +86,9 @@
   "config.trident.fishing.island_indicators.name": "Fishing Island Indicators",
   "config.trident.fishing.island_indicators.description": "Shows the current wind and tides on fishing island inside the Navigator menu.",
 
+  "config.trident.fishing.event_orders_module.name": "Event Orders Module",
+  "config.trident.fishing.event_orders_module.description": "Shows a window that displays your 3 current Event Orders and your progress towards completing them.",
+
   "config.trident.fishing.wayfinder.name": "Wayfinder Module",
   "config.trident.fishing.wayfinder.description": "Shows a window that displays your progress towards Grottos as well as any active Grotto's stabilities.",
   "config.trident.fishing.wayfinder_module.name": "Enabled",

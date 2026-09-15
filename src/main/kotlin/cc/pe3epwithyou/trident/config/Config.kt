@@ -108,6 +108,9 @@ class Config {
     var fishingIslandIndicators: Boolean = true
 
     @SerialEntry
+    var fishingEventOrdersModule: Boolean = true
+
+    @SerialEntry
     var debugEnableLogging: Boolean = false
 
     @SerialEntry
@@ -300,6 +303,8 @@ class Config {
             get() = handler.instance().fishingWayfinderModule
         val wayfinderModuleCompact: Boolean
             get() = handler.instance().fishingWayfinderModuleCompact
+        val eventOrdersModule: Boolean
+            get() = handler.instance().fishingEventOrdersModule
     }
 
     object Games {

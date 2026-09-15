@@ -5,6 +5,7 @@ import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.disguise.Disguise
 import cc.pe3epwithyou.trident.feature.chat.dmlock.ReplyLock
 import cc.pe3epwithyou.trident.feature.fishing.DepletedDisplay
+import cc.pe3epwithyou.trident.feature.orders.OrderStorage
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.state.MCCIState
 import cc.pe3epwithyou.trident.state.fishing.AugmentTrigger
@@ -114,6 +115,11 @@ object ChatEventListener {
                     isSupplyPreserve = false
                     val isJunk = isJunk(message)
                     triggerBait = !isJunk
+
+                    val fishName = it.groups[1]?.value
+                    if (fishName != null) {
+                        OrderStorage.applyCatch(fishName)
+                    }
                 }
 
 

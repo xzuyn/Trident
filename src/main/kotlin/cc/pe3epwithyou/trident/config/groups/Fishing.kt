@@ -71,6 +71,13 @@ fun fishingCategory(categoryRegistrar: CategoryRegistrar) {
             controller(tickBox())
         }
 
+        rootOptions.register("event_orders_module") {
+            name(Component.translatable("config.trident.fishing.event_orders_module.name"))
+            description(OptionDescription.of(Component.translatable("config.trident.fishing.event_orders_module.description")))
+            binding(handler.instance()::fishingEventOrdersModule, true)
+            controller(tickBox())
+        }
+
         groups.register("wayfinder_group") {
             name(Component.translatable("config.trident.fishing.wayfinder.name"))
             description(

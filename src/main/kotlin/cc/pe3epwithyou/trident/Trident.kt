@@ -24,6 +24,7 @@ import cc.pe3epwithyou.trident.feature.fishing.listeners.ResearchListeners
 import cc.pe3epwithyou.trident.feature.fishing.listeners.SuppliesListeners
 import cc.pe3epwithyou.trident.feature.fishing.listeners.WayfinderListeners
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
+import cc.pe3epwithyou.trident.feature.orders.listeners.EventOrdersListeners
 import cc.pe3epwithyou.trident.feature.questing.QuestListener
 import cc.pe3epwithyou.trident.feature.questing.QuestStorage
 import cc.pe3epwithyou.trident.feature.questing.lock.QuestLock
@@ -109,6 +110,7 @@ class Trident : ModInitializer {
         SuppliesListeners.register()
         WayfinderListeners.register()
         ResearchListeners.register()
+        EventOrdersListeners.register()
         ExchangeHandler.register()
         ActivityManager.Arena.register()
         Doll.register()
