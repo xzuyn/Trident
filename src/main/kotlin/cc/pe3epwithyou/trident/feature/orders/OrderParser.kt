@@ -5,6 +5,8 @@ import cc.pe3epwithyou.trident.state.OrderRequirement
 import cc.pe3epwithyou.trident.state.OrderReward
 import cc.pe3epwithyou.trident.state.Rarity
 import cc.pe3epwithyou.trident.utils.extensions.ItemStackExtensions.getLore
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.world.item.ItemStack
 
 object OrderParser {
@@ -20,12 +22,11 @@ object OrderParser {
     fun parse(item: ItemStack, slot: Int): Order? {
         if (item.isEmpty) return null
 
-        val lore = item.getLore().map { it.string }
+        val loreComponents = item.getLore()
+        val lore = loreComponents.map { it.string }
         if (lore.none { it.contains("Order Requirements:", ignoreCase = true) }) return null
 
-        val rarity = lore.firstNotNullOfOrNull { line ->
-            Rarity.entries.find { it.name.equals(line.trim(), ignoreCase = true) }
-        } ?: Rarity.COMMON
+        val rarity = detectRarity(loreComponents)
 
         val requirements = mutableListOf<OrderRequirement>()
         val rewards = mutableListOf<OrderReward>()
@@ -69,4 +70,23 @@ object OrderParser {
             slot = slot
         )
     }
+
+    /**
+     * Detects an order's rarity primarily by matching the text color of a lore line against
+     * the known [Rarity] colors (mirrors [Rarity.getFromItem]), falling back to matching the
+     * rarity's name as plain text (e.g. a lore line that just reads "UNCOMMON").
+     */
+    private fun detectRarity(lore: List<Component>): Rarity {
+        lore.forEach { component ->
+            val color = component.style.color ?: return@forEach
+            Rarity.entries.find { TextColor.fromRgb(it.color) == color }?.let { return it }
+        }
+
+        lore.firstNotNullOfOrNull { component ->
+            Rarity.entries.find { it.name.equals(component.string.trim(), ignoreCase = true) }
+        }?.let { return it }
+
+        return Rarity.COMMON
+    }
 }
+

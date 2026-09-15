@@ -8,7 +8,6 @@ import cc.pe3epwithyou.trident.feature.dojo.DOJO_SPLITS_DIALOG_KEY
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.friends.FriendsInServer
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
-import cc.pe3epwithyou.trident.feature.orders.OrderStorage
 import cc.pe3epwithyou.trident.feature.questing.GameQuests
 import cc.pe3epwithyou.trident.feature.questing.IncrementContext
 import cc.pe3epwithyou.trident.feature.questing.QuestStorage
@@ -17,7 +16,6 @@ import cc.pe3epwithyou.trident.interfaces.dojo.DojoSplitsDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.SuppliesDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.WayfinderDialog
 import cc.pe3epwithyou.trident.interfaces.killfeed.KillFeedDialog
-import cc.pe3epwithyou.trident.interfaces.orders.EventOrdersDialog
 import cc.pe3epwithyou.trident.interfaces.questing.QuestingDialog
 import cc.pe3epwithyou.trident.state.ClimateType
 import cc.pe3epwithyou.trident.state.Game
@@ -57,11 +55,7 @@ object NoxesiumManager {
             val k = "wayfinder"
             DialogCollection.open(k, WayfinderDialog(10, 10, k))
         }
-        if (Config.Fishing.eventOrdersModule && MCCIState.isOnSeaMonstersIsland()) {
-            val k = OrderStorage.DIALOG_KEY
-            DialogCollection.open(k, EventOrdersDialog(10, 10, k))
-        }
-        if (KillChatListener.killfeedGames.contains(currentGame) && Config.KillFeed.enabled) {
+        if (Config.KillFeed.enabled && KillChatListener.killfeedGames.contains(currentGame)) {
             val k = "killfeed"
             DialogCollection.open(k, KillFeedDialog(10, 10, k))
         }

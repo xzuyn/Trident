@@ -24,11 +24,13 @@ import cc.pe3epwithyou.trident.feature.fishing.listeners.ResearchListeners
 import cc.pe3epwithyou.trident.feature.fishing.listeners.SuppliesListeners
 import cc.pe3epwithyou.trident.feature.fishing.listeners.WayfinderListeners
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
+import cc.pe3epwithyou.trident.feature.orders.OrderStorage
 import cc.pe3epwithyou.trident.feature.orders.listeners.EventOrdersListeners
 import cc.pe3epwithyou.trident.feature.questing.QuestListener
 import cc.pe3epwithyou.trident.feature.questing.QuestStorage
 import cc.pe3epwithyou.trident.feature.questing.lock.QuestLock
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
+import cc.pe3epwithyou.trident.interfaces.orders.EventOrdersDialog
 import cc.pe3epwithyou.trident.mixin.accessors.DebugScreenEntriesAccessor
 import cc.pe3epwithyou.trident.modrinth.UpdateChecker
 import cc.pe3epwithyou.trident.state.Game
@@ -142,6 +144,16 @@ class Trident : ModInitializer {
             if (!MCCIState.isOnIsland()) return@register
             if (MCCIState.game != Game.PARKOUR_WARRIOR_DOJO) return@register
             DojoSplitManager.pollCourseName()
+        }
+
+        ClientTickEvents.END_CLIENT_TICK.register {
+            if (!MCCIState.isOnIsland()) return@register
+            val k = OrderStorage.DIALOG_KEY
+            if (Config.Fishing.eventOrdersModule && MCCIState.isOnSeaMonstersIsland()) {
+                DialogCollection.open(k, EventOrdersDialog(10, 10, k))
+            } else {
+                DialogCollection.close(k)
+            }
         }
 
 //        Register Questing events
