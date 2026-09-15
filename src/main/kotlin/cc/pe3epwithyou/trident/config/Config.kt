@@ -99,6 +99,9 @@ class Config {
     var fishingWayfinderModule: Boolean = true
 
     @SerialEntry
+    var fishingWayfinderModuleCompact: Boolean = false
+
+    @SerialEntry
     var fishingFlashIfDepleted: Boolean = true
 
     @SerialEntry
@@ -295,6 +298,8 @@ class Config {
             get() = handler.instance().fishingIslandIndicators
         val wayfinderModule: Boolean
             get() = handler.instance().fishingWayfinderModule
+        val wayfinderModuleCompact: Boolean
+            get() = handler.instance().fishingWayfinderModuleCompact
     }
 
     object Games {

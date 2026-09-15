@@ -24,7 +24,7 @@ public class DebugScreenEntriesMixin {
     public static Map<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>> PROFILES;
 
     @Inject(method = "<clinit>", at = @At("TAIL"))
-    private static void modifyDefaultProfile(CallbackInfo ci) {
+    private static void trident$modifyDefaultProfile(CallbackInfo ci) {
         Map<DebugScreenProfile, Map<Identifier, DebugScreenEntryStatus>> newProfiles = new HashMap<>(PROFILES);
         Map<Identifier, DebugScreenEntryStatus> defaultProfile = new HashMap<>(newProfiles.get(DebugScreenProfile.DEFAULT));
 

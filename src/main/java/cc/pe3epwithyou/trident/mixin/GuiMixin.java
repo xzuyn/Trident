@@ -21,10 +21,10 @@ public abstract class GuiMixin {
     protected abstract Player getCameraPlayer();
 
     @Inject(method = "extractItemHotbar", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/HumanoidArm;getOpposite()Lnet/minecraft/world/entity/HumanoidArm;", shift = At.Shift.AFTER))
-    public void injectRenderItemHotbar(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+    public void trident$extractItemHotbar(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         if (getCameraPlayer() == null) return;
-        ReplyLock.Icon.renderIcon(guiGraphics, getCameraPlayer());
-        EffectBar.render(guiGraphics);
+        ReplyLock.Icon.renderIcon(graphics, getCameraPlayer());
+        EffectBar.render(graphics);
     }
 }

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(ChatComponent.class)
 public class ChatComponentMixin {
     @WrapMethod(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageSource;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V")
-    public void wrapAddMessage(Component contents, MessageSignature signature, GuiMessageSource source, GuiMessageTag tag, Operation<Void> original) {
+    public void trident$addMessage(Component contents, MessageSignature signature, GuiMessageSource source, GuiMessageTag tag, Operation<Void> original) {
         Component modified = ReplyLock.INSTANCE.modifyComponent(contents);
         modified = Chatrooms.modifyComponent(modified);
 
