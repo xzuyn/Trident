@@ -57,7 +57,7 @@ object NoxesiumManager {
             val k = "wayfinder"
             DialogCollection.open(k, WayfinderDialog(10, 10, k))
         }
-        if (currentGame == Game.FISHING && Config.Fishing.eventOrdersModule && MCCIState.isOnSeaMonstersIsland()) {
+        if (Config.Fishing.eventOrdersModule && MCCIState.isOnSeaMonstersIsland()) {
             val k = OrderStorage.DIALOG_KEY
             DialogCollection.open(k, EventOrdersDialog(10, 10, k))
         }
