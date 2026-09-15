@@ -117,7 +117,7 @@ object ChatEventListener {
                     triggerBait = !isJunk
 
                     val fishName = it.groups[1]?.value
-                    if (fishName != null) {
+                    if (fishName != null && MCCIState.isOnSeaMonstersIsland()) {
                         OrderStorage.applyCatch(fishName)
                     }
                 }

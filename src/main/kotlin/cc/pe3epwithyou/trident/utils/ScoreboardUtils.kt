@@ -13,6 +13,13 @@ object ScoreboardUtils {
         return predicate.find(c.string)
     }
 
+    fun titleContains(predicate: Regex): Boolean {
+        val title = getTitle() ?: return false
+        return predicate.containsMatchIn(title.string)
+    }
+
+    fun getTitle(): Component? = getObjective()?.displayName
+
     fun getLines(): List<Component> {
         getScoreboard()?.let { scoreboard ->
             val obj = getObjective() ?: return emptyList()

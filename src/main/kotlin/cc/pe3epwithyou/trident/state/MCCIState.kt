@@ -45,6 +45,15 @@ object MCCIState {
         return server.ip.contains("mccisland.net", true)
     }
 
+    /**
+     * Whether the player is currently on the Sea Monsters Event island, determined by the
+     * "MCCI: SEA MONSTERS ISLAND" scoreboard title.
+     */
+    fun isOnSeaMonstersIsland(): Boolean {
+        if (!isOnIsland()) return false
+        return ScoreboardUtils.titleContains(Regex("""SEA MONSTERS ISLAND""", RegexOption.IGNORE_CASE))
+    }
+
     @JvmStatic
     fun onJoin() = minecraft().execute {
         UpdateChecker.checkForUpdates()

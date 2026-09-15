@@ -5,6 +5,7 @@ import cc.pe3epwithyou.trident.events.container.ContainerContext
 import cc.pe3epwithyou.trident.events.container.ContainerEvents
 import cc.pe3epwithyou.trident.feature.orders.OrderParser
 import cc.pe3epwithyou.trident.feature.orders.OrderStorage
+import cc.pe3epwithyou.trident.state.MCCIState
 import cc.pe3epwithyou.trident.state.Order
 import cc.pe3epwithyou.trident.utils.Logger
 
@@ -19,6 +20,7 @@ object EventOrdersListeners {
     fun find(ctx: ContainerContext) = with(ctx) {
         requireTitle("EVENT ORDERS")
         if (!Config.Fishing.eventOrdersModule) return@with
+        if (!MCCIState.isOnSeaMonstersIsland()) return@with
 
         val orders = mutableListOf<Order>()
         handledScreen.menu.slots.forEach { slot ->
