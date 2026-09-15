@@ -109,13 +109,11 @@ object ChatEventListener {
 
 
                 Regex("^\\(.\\) You caught: \\[(.+)](?:\\s*[xX](\\d+))?.*").matchEntire(message.string)?.let {
-                    if (!catchFinished) return@allowMessage true
-
-                    catchFinished = false
-                    isSupplyPreserve = false
-                    val isJunk = isJunk(message)
-                    triggerBait = !isJunk
-
+                    // Event order progress tracking is intentionally independent of the
+                    // catchFinished gate below (which exists purely for supplies/durability
+                    // bookkeeping tied to the standard fishing minigame's XP message) - Sea
+                    // Monsters Island catches don't necessarily emit that XP message, which
+                    // would otherwise leave the gate stuck closed after the first catch.
                     val rawFishName = it.groups[1]?.value
                     val outsideQuantity = it.groups[2]?.value?.toIntOrNull()
 
@@ -131,6 +129,13 @@ object ChatEventListener {
                             OrderStorage.applyCatch(fishName, quantity)
                         }
                     }
+
+                    if (!catchFinished) return@allowMessage true
+
+                    catchFinished = false
+                    isSupplyPreserve = false
+                    val isJunk = isJunk(message)
+                    triggerBait = !isJunk
                 }
 
 
