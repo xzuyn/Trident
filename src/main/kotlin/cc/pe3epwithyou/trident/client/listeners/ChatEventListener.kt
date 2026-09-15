@@ -108,7 +108,7 @@ object ChatEventListener {
                 }
 
 
-                Regex("^\\(.\\) You caught: \\[(.+)].*").matchEntire(message.string)?.let {
+                Regex("^\\(.\\) You caught: \\[(.+)](?:\\s*[xX](\\d+))?.*").matchEntire(message.string)?.let {
                     if (!catchFinished) return@allowMessage true
 
                     catchFinished = false
@@ -116,9 +116,20 @@ object ChatEventListener {
                     val isJunk = isJunk(message)
                     triggerBait = !isJunk
 
-                    val fishName = it.groups[1]?.value
-                    if (fishName != null && MCCIState.isOnSeaMonstersIsland()) {
-                        OrderStorage.applyCatch(fishName)
+                    val rawFishName = it.groups[1]?.value
+                    val outsideQuantity = it.groups[2]?.value?.toIntOrNull()
+
+                    if (rawFishName != null) {
+                        // A fishing-magnet-style perk can catch multiple at once. That count
+                        // can show up either outside the brackets ("[Coal Cod] x2") or inside
+                        // them ("[Coal Cod x2]") - handle both.
+                        val insideMatch = Regex("""^(.*?)\s+[xX](\d+)$""").find(rawFishName.trim())
+                        val fishName = insideMatch?.groupValues?.get(1)?.trim() ?: rawFishName.trim()
+                        val quantity = outsideQuantity ?: insideMatch?.groupValues?.get(2)?.toIntOrNull() ?: 1
+
+                        if (fishName.isNotBlank()) {
+                            OrderStorage.applyCatch(fishName, quantity)
+                        }
                     }
                 }
 
