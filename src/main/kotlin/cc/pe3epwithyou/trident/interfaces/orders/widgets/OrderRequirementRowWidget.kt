@@ -6,6 +6,7 @@ import cc.pe3epwithyou.trident.utils.ProgressBar
 import cc.pe3epwithyou.trident.utils.extensions.ComponentExtensions.defaultFont
 import cc.pe3epwithyou.trident.utils.minecraft
 import com.noxcrew.sheeplib.util.opaqueColor
+import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.narration.NarrationElementOutput
@@ -49,7 +50,11 @@ class OrderRequirementRowWidget(
         val done = requirement.current >= requirement.total
         val fishRarity = OrderFishData.getRarity(requirement.fishName)
 
-        val nameComponent = Component.literal(nameText()).defaultFont().withColor(fishRarity.color)
+        val nameComponent = if (done) {
+            Component.literal(nameText()).defaultFont().withStyle(ChatFormatting.DARK_GRAY)
+        } else {
+            Component.literal(nameText()).defaultFont().withColor(fishRarity.color)
+        }
         graphics.text(font, nameComponent, x + PADDING, y + 1, 0xFFFFFF.opaqueColor())
 
         val barX = x + PADDING + nameColumnWidth + GAP
