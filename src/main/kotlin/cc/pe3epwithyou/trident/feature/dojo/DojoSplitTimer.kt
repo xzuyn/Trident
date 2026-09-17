@@ -378,9 +378,9 @@ class DojoSplitTimer private constructor(val courseName: String?) {
          * with the exact values reported once confirmed.
          */
         private val ENDING_COLORS: Map<Int, DojoEnding> = mapOf(
-            // 0x?????? to DojoEnding.EASY,
-            // 0x?????? to DojoEnding.MEDIUM,
-            // 0x?????? to DojoEnding.HARD,
+            0x55FF55 to DojoEnding.EASY,
+            0xFFFF55 to DojoEnding.MEDIUM,
+            0xFF5555 to DojoEnding.HARD,
         )
 
         var instance: DojoSplitTimer? = null
