@@ -15,7 +15,9 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
+import net.minecraft.network.chat.Style
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
+import java.util.Optional
 import java.util.regex.Pattern
 
 /**
@@ -105,16 +107,62 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         val matcher = LEVEL_NAME_PATTERN.matcher(string)
         if (!matcher.find()) return
 
+        val rawLevelName = matcher.group(1)
+        val resolvedLevelName = resolveEndingName(rawLevelName, component)
+
         // This is the transition/level boundary: the unnamed corridor leading here ends now,
         // and the (route-independent) obstacle begins. transitionStartTimestamp is untouched,
         // so the two pieces can be measured separately once this level's medal is found.
         levelStartTimestamp = System.currentTimeMillis()
-        levelName = matcher.group(1)
+        levelName = resolvedLevelName
         currentLevelUid = "${previousLevelName}_$levelName"
         isBetween = false
         Logger.debugLog("DojoSplitTimer - Detected level with id: $currentLevelUid")
 
         DialogCollection.refreshDialog(DOJO_SPLITS_DIALOG_KEY)
+    }
+
+    /**
+     * The bracketed level id the server sends for every ending obstacle reads literally
+     * `[B4-1]` regardless of which difficulty (Easy/Medium/Hard) is actually being attempted —
+     * the id itself can't tell them apart. The only other signal available is the color of the
+     * obstacle's human-readable name in that same subtitle (e.g. "The Ledge Leap"), which does
+     * vary by difficulty and is confirmed to be fixed per difficulty (not randomized).
+     *
+     * [ENDING_COLORS] is empty until confirmed exact values are hardcoded in. Until then this
+     * logs the exact color seen (as a chat message, so it's easy to grab without digging
+     * through logs) and leaves [rawLevelName] unchanged.
+     */
+    private fun resolveEndingName(rawLevelName: String, component: Component): String {
+        if (rawLevelName != "B4-1") return rawLevelName
+
+        val colorHex = findNonBracketedTextColor(component)
+        val hexText = colorHex?.let { "#%06X".format(it) } ?: "none"
+
+        val ending = ENDING_COLORS[colorHex]
+        if (ending == null) {
+            Logger.sendMessage(Component.literal("[Trident] Dojo ending color: $hexText (not yet mapped to a difficulty)"))
+            Logger.debugLog("DojoSplitTimer - Unmapped ending subtitle color: $hexText")
+            return rawLevelName
+        }
+
+        return when (ending) {
+            DojoEnding.EASY -> "B4-1"
+            DojoEnding.MEDIUM -> "B4-2"
+            DojoEnding.HARD -> "B4-3"
+        }
+    }
+
+    /** Walks the subtitle's styled runs for the color of the first non-blank segment that isn't the "[...]" id itself. */
+    private fun findNonBracketedTextColor(component: Component): Int? {
+        var found: Int? = null
+        component.visit({ style, text ->
+            if (found == null && text.isNotBlank() && !text.contains('[') && !text.contains(']')) {
+                found = style.color?.value
+            }
+            Optional.empty<Unit>()
+        }, Style.EMPTY)
+        return found
     }
 
     /**
@@ -322,6 +370,18 @@ class DojoSplitTimer private constructor(val courseName: String?) {
     companion object {
         private val LEVEL_NAME_PATTERN: Pattern = Pattern.compile("\\[(.*)]")
         private val COURSE_NAME_PATTERN = Regex("""COURSE: (.*)""")
+
+        /**
+         * Exact ARGB-less RGB values (0xRRGGBB) of the ending obstacle name's text color, keyed
+         * to the difficulty it means. Empty until confirmed via the "[Trident] Dojo ending
+         * color: #RRGGBB" chat message logged in-game for each of the three endings - fill in
+         * with the exact values reported once confirmed.
+         */
+        private val ENDING_COLORS: Map<Int, DojoEnding> = mapOf(
+            // 0x?????? to DojoEnding.EASY,
+            // 0x?????? to DojoEnding.MEDIUM,
+            // 0x?????? to DojoEnding.HARD,
+        )
 
         var instance: DojoSplitTimer? = null
             private set
