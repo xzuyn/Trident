@@ -65,9 +65,9 @@ val ALWAYS_SEPARATE_TRANSITIONS: Set<String> = setOf(
     "M1-3_M2-1",
     "M2-3_M3-1",
     // ENDINGS
-    "M3-3_B4-1",  //EASY
-    "M3-3_B4-2",  //MEDIUM
-    "M3-3_B4-3",  //HARD
+    "M3-3_EASY",  //EASY
+    "M3-3_MEDIUM",  //MEDIUM
+    "M3-3_HARD",  //HARD
     //BONUS 1
     "START_B1-1",
     "B1-3_M1-1",
@@ -94,9 +94,9 @@ fun buildCanonicalLevelNames(): List<String> = buildList {
     addAll(listOf("M3-1", "M3-2", "M3-3"))
     add(
         when (dojo.routeEnding) {
-            DojoEnding.EASY -> "B4-1"
-            DojoEnding.MEDIUM -> "B4-2"
-            DojoEnding.HARD -> "B4-3"
+            DojoEnding.EASY -> "EASY"
+            DojoEnding.MEDIUM -> "MEDIUM"
+            DojoEnding.HARD -> "HARD"
         }
     )
 }

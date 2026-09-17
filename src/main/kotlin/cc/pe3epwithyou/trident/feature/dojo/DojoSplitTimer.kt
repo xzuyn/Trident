@@ -147,9 +147,9 @@ class DojoSplitTimer private constructor(val courseName: String?) {
         }
 
         return when (ending) {
-            DojoEnding.EASY -> "B4-1"
-            DojoEnding.MEDIUM -> "B4-2"
-            DojoEnding.HARD -> "B4-3"
+            DojoEnding.EASY -> "EASY"
+            DojoEnding.MEDIUM -> "MEDIUM"
+            DojoEnding.HARD -> "HARD"
         }
     }
 
