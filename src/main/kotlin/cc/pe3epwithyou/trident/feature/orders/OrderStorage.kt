@@ -28,14 +28,9 @@ object OrderStorage {
         var updated = false
         orders.forEach { order ->
             order.requirements.forEach { requirement ->
-                if (requirement.current < requirement.total &&
-                    requirement.fishName.equals(fishName, ignoreCase = true)
-                ) {
-                    val newCurrent = (requirement.current + quantity).coerceAtMost(requirement.total)
-                    if (newCurrent != requirement.current) {
-                        requirement.current = newCurrent
-                        updated = true
-                    }
+                if (requirement.fishName.equals(fishName, ignoreCase = true)) {
+                    requirement.current += quantity
+                    updated = true
                 }
             }
         }
@@ -43,5 +38,21 @@ object OrderStorage {
         Logger.debugLog("Applied event order catch: $fishName x$quantity (updated=$updated)")
         if (updated) DialogCollection.refreshDialog(DIALOG_KEY)
         return updated
+    }
+
+    /**
+     * The [FishingLocation] with the most fish still needed across every incomplete
+     * requirement in the active orders - i.e. the island that would clear the most progress.
+     * Null if there are no orders loaded, or every requirement is already fulfilled.
+     */
+    fun suggestedLocation(): FishingLocation? {
+        return playerState().eventOrders.orders
+            .flatMap { it.requirements }
+            .filter { it.current < it.total }
+            .mapNotNull { req -> OrderFishData.find(req.fishName)?.location?.let { it to (req.total - req.current) } }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, needed) -> needed.sum() }
+            .maxByOrNull { it.value }
+            ?.key
     }
 }

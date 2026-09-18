@@ -7,6 +7,7 @@ import cc.pe3epwithyou.trident.interfaces.shared.TridentDialog
 import cc.pe3epwithyou.trident.interfaces.themes.DialogTitle
 import cc.pe3epwithyou.trident.interfaces.themes.TridentThemed
 import cc.pe3epwithyou.trident.feature.orders.OrderFishData
+import cc.pe3epwithyou.trident.feature.orders.OrderStorage
 import cc.pe3epwithyou.trident.state.FontCollection
 import cc.pe3epwithyou.trident.state.Order
 import cc.pe3epwithyou.trident.utils.ProgressBar
@@ -31,6 +32,7 @@ class EventOrdersDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
     private companion object {
         private val TITLE_COLOR: Int = 0xe9a825 opacity 127
         private const val COMPLETE_COLOR: Int = 0x80ff82
+        private const val SUGGESTED_COLOR: Int = 0xffd479
         private const val QUEST_ICON_DIRECTORY = "island_interface/quest_log/daily/"
         private const val COMPLETE_ICON = "island_interface/generic/accept"
         private const val MIN_ROW_WIDTH = 120
@@ -114,6 +116,16 @@ class EventOrdersDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
                 barWidth +
                 maxFractionWidth
             ).coerceAtLeast(MIN_ROW_WIDTH)
+
+        OrderStorage.suggestedLocation()?.let { location ->
+            StringWidget(
+                Component.literal("Suggested: ${location.displayName}")
+                    .mccFont()
+                    .withColor(SUGGESTED_COLOR),
+                mcFont
+            ).atBottom(0, settings = LayoutConstants.LEFT)
+            OrderDividerWidget(rowWidth).atBottom(0, settings = LayoutConstants.LEFT)
+        }
 
         orders.forEachIndexed { index, order ->
             StringWidget(buildHeader(order), mcFont).atBottom(0, settings = LayoutConstants.LEFT)
