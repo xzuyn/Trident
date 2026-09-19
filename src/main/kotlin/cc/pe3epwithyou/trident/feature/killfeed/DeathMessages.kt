@@ -89,6 +89,6 @@ enum class DeathMessages(
         Regex("^\\[.] .+ was cleansed by .+"), KillMethod.ORB
     ),
     FALLBACK(
-        Regex("^\\[\uE307] (?!.*, you were eliminated in .+ place).+"), KillMethod.GENERIC
+        Regex("^\\[\uE307] (?!.*, you were eliminated in .+).+"), KillMethod.GENERIC
     ),
 }
