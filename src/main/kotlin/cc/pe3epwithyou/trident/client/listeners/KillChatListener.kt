@@ -22,7 +22,8 @@ object KillChatListener {
         Game.DYNABALL,
         Game.SKY_BATTLE,
         Game.SKY_BATTLE_SOLO,
-        Game.ROCKET_SPLEEF_RUSH
+        Game.ROCKET_SPLEEF_RUSH,
+        Game.HITW
     )
 
     private val fallbackColor = 0xFFFFFF opacity 128
