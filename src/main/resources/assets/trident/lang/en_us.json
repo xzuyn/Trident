@@ -92,6 +92,9 @@
   "config.trident.fishing.event_orders_show_location.name": "Event Orders Show Location",
   "config.trident.fishing.event_orders_show_location.description": "Shows the island where each required fish can be caught next to its name in the Event Orders module.",
 
+  "config.trident.fishing.event_orders_suggestion_mode.name": "Event Orders Suggested Island",
+  "config.trident.fishing.event_orders_suggestion_mode.description": "How the Event Orders module picks its suggested island: 'Most Fish Needed' totals remaining fish across every incomplete order per island; 'Soonest Order Completion' picks whichever island would fully finish an order in the fewest catches.",
+
   "config.trident.fishing.wayfinder.name": "Wayfinder Module",
   "config.trident.fishing.wayfinder.description": "Shows a window that displays your progress towards Grottos as well as any active Grotto's stabilities.",
   "config.trident.fishing.wayfinder_module.name": "Enabled",

@@ -6,6 +6,7 @@ import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoEnding
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitType
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedPosition
+import cc.pe3epwithyou.trident.feature.orders.OrderSuggestionMode
 import cc.pe3epwithyou.trident.feature.rarityslot.DisplayType
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.interfaces.themes.TridentThemes
@@ -112,6 +113,9 @@ class Config {
 
     @SerialEntry
     var fishingEventOrdersShowLocation: Boolean = false
+
+    @SerialEntry
+    var fishingEventOrdersSuggestionMode: OrderSuggestionMode = OrderSuggestionMode.MOST_NEEDED
 
     @SerialEntry
     var debugEnableLogging: Boolean = false
@@ -310,6 +314,8 @@ class Config {
             get() = handler.instance().fishingEventOrdersModule
         val eventOrdersShowLocation: Boolean
             get() = handler.instance().fishingEventOrdersShowLocation
+        val eventOrdersSuggestionMode: OrderSuggestionMode
+            get() = handler.instance().fishingEventOrdersSuggestionMode
     }
 
     object Games {

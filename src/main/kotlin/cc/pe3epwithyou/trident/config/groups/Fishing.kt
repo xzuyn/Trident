@@ -1,6 +1,7 @@
 package cc.pe3epwithyou.trident.config.groups
 
 import cc.pe3epwithyou.trident.config.Config.Companion.handler
+import cc.pe3epwithyou.trident.feature.orders.OrderSuggestionMode
 import cc.pe3epwithyou.trident.utils.Resources
 import dev.isxander.yacl3.api.Option
 import dev.isxander.yacl3.api.OptionDescription
@@ -8,6 +9,7 @@ import dev.isxander.yacl3.api.OptionEventListener
 import dev.isxander.yacl3.dsl.CategoryRegistrar
 import dev.isxander.yacl3.dsl.available
 import dev.isxander.yacl3.dsl.binding
+import dev.isxander.yacl3.dsl.enumSwitch
 import dev.isxander.yacl3.dsl.tickBox
 import net.minecraft.network.chat.Component
 
@@ -83,6 +85,13 @@ fun fishingCategory(categoryRegistrar: CategoryRegistrar) {
             description(OptionDescription.of(Component.translatable("config.trident.fishing.event_orders_show_location.description")))
             binding(handler.instance()::fishingEventOrdersShowLocation, false)
             controller(tickBox())
+        }
+
+        rootOptions.register("event_orders_suggestion_mode") {
+            name(Component.translatable("config.trident.fishing.event_orders_suggestion_mode.name"))
+            description(OptionDescription.of(Component.translatable("config.trident.fishing.event_orders_suggestion_mode.description")))
+            binding(handler.instance()::fishingEventOrdersSuggestionMode, OrderSuggestionMode.MOST_NEEDED)
+            controller(enumSwitch<OrderSuggestionMode> { v -> v.displayName })
         }
 
         groups.register("wayfinder_group") {
