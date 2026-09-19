@@ -88,4 +88,7 @@ enum class DeathMessages(
     CLEANSED(
         Regex("^\\[.] .+ was cleansed by .+"), KillMethod.ORB
     ),
+    FALLBACK(
+        Regex("^\\[💀] .+"), KillMethod.GENERIC
+    ),
 }
