@@ -38,6 +38,8 @@ object KillChatListener {
         ClientReceiveMessageEvents.ALLOW_GAME.register allowGame@{ message, _ ->
             if (!MCCIState.isOnIsland()) return@allowGame true
             try {
+                Logger.debugLog("Chat message: '${message.string}' codepoints=[${codepointDump(message.string)}]")
+
                 Regex("""^\[.] You assisted in eliminating (.+)!""").find(message.string)?.let {
                     KillfeedLifecycle.applyKillAssist()
                 }
@@ -119,6 +121,9 @@ object KillChatListener {
 
         return Pair(attackerColor, victimColor)
     }
+
+    private fun codepointDump(s: String): String =
+        s.codePoints().toArray().joinToString(" ") { "U+%04X".format(it) }
 
     fun findPlayersInComponent(c: Component): List<Component> {
         val rawList = c.toFlatList()
