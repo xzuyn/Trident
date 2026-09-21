@@ -127,7 +127,7 @@ fun killfeedCategory(categoryRegistrar: CategoryRegistrar) {
             name(Component.translatable("config.trident.killfeed.max_kills.name"))
             description(OptionDescription.of(Component.translatable("config.trident.killfeed.max_kills.description")))
             binding(handler.instance()::killfeedMaxKills, 5)
-            controller(slider(IntRange(1, 10), 1))
+            controller(slider(IntRange(1, 12), 1))
             available { handler.instance().killfeedEnabled }
         }
     }
