@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component
 class KillTransition(
     private val leftColor: Int,
     private val rightColor: Int,
-) : AbstractWidget(0, 0, 8, 15, Component.empty()) {
+) : AbstractWidget(0, 0, 5, 15, Component.empty()) {
     override fun extractWidgetRenderState(guiGraphics: GuiGraphicsExtractor, i: Int, j: Int, f: Float) {
         val leftPath = Resources.trident("killfeed/left")
         val rightPath = Resources.trident("killfeed/right")
@@ -19,7 +19,7 @@ class KillTransition(
             leftPath,
             x,
             y,
-            8,
+            5,
             15,
             leftColor
         )
@@ -28,7 +28,7 @@ class KillTransition(
             rightPath,
             x,
             y,
-            8,
+            5,
             15,
             rightColor
         )
