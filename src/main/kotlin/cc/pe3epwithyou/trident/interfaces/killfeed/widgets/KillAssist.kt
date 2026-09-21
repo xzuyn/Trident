@@ -9,7 +9,7 @@ import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.network.chat.Component
 
-class KillAssist(val color: Int) : AbstractWidget(0, 0, 13, 9, Component.empty()) {
+class KillAssist(val color: Int) : AbstractWidget(0, 0, 13, 11, Component.empty()) {
     private val skullComponent: Component
 
     init {
@@ -22,10 +22,10 @@ class KillAssist(val color: Int) : AbstractWidget(0, 0, 13, 9, Component.empty()
 
     override fun extractWidgetRenderState(guiGraphics: GuiGraphicsExtractor, i: Int, j: Int, f: Float) {
         guiGraphics.fillRoundedAll(
-            x, y + 6, 11, 9, color
+            x, y + 1, 11, 9, color
         )
         val font = minecraft().font
-        guiGraphics.text(font, skullComponent, x + 2, y + 7, 0xFFFFFF.opaqueColor())
+        guiGraphics.text(font, skullComponent, x + 2, y + 2, 0xFFFFFF.opaqueColor())
     }
 
     override fun updateWidgetNarration(narrationElementOutput: NarrationElementOutput): Unit = Unit

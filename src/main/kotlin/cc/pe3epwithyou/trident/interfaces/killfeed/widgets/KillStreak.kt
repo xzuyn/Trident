@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component
 class KillStreak(
     private val color: Int,
     private val streak: Int
-) : AbstractWidget(0, 0, 15, 9, Component.empty()) {
+) : AbstractWidget(0, 0, 15, 11, Component.empty()) {
     private fun getStreakTexture(): Texture {
         val coercedStreak = streak.coerceIn(1, 5)
         return Texture(
@@ -28,12 +28,12 @@ class KillStreak(
         }
         guiGraphics.fillRoundedAll(
             x,
-            y + 6,
+            y + 1,
             13,
             9,
             color
         )
-        getStreakTexture().blit(guiGraphics, x, y + 6)
+        getStreakTexture().blit(guiGraphics, x, y + 1)
     }
 
     override fun updateWidgetNarration(narrationElementOutput: NarrationElementOutput) = Unit

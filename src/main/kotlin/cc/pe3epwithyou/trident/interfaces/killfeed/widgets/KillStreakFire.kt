@@ -24,7 +24,7 @@ class KillStreakFire : AbstractWidget(0, 0, 22, 10, Component.empty()) {
         FIRE_MODEL.render(
             guiGraphics,
             x,
-            y + 3
+            y + 1
         )
     }
 
