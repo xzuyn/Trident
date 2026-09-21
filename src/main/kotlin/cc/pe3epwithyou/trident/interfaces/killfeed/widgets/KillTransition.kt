@@ -20,7 +20,7 @@ class KillTransition(
             x,
             y,
             8,
-            15,
+            11,
             leftColor
         )
         guiGraphics.blitSprite(
@@ -29,7 +29,7 @@ class KillTransition(
             x,
             y,
             8,
-            15,
+            11,
             rightColor
         )
     }
