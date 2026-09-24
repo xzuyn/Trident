@@ -19,23 +19,24 @@ object OrderStorage {
     }
 
     /**
-     * Applies a caught fish towards any active order requirements matching [fishName],
-     * incrementing by [quantity] (e.g. > 1 when a fishing magnet-style perk catches multiple
-     * fish at once). Returns true if any requirement's progress was updated.
+     * Applies a caught fish towards the first active order requirement matching [fishName]
+     * that still needs it (i.e. `current < total`), incrementing it by [quantity] (e.g. > 1
+     * when a fishing magnet-style perk catches multiple fish at once). Orders are matched in
+     * their display order, so a completed requirement in an earlier order is skipped in favor
+     * of the same fish's requirement in the next order that still needs it. Returns true if a
+     * requirement's progress was updated.
      */
     fun applyCatch(fishName: String, quantity: Int = 1): Boolean {
         val orders = playerState().eventOrders.orders
         if (orders.isEmpty()) return false
 
-        var updated = false
-        orders.forEach { order ->
-            order.requirements.forEach { requirement ->
-                if (requirement.fishName.equals(fishName, ignoreCase = true)) {
-                    requirement.current += quantity
-                    updated = true
-                }
+        val requirement = orders.firstNotNullOfOrNull { order ->
+            order.requirements.firstOrNull {
+                it.fishName.equals(fishName, ignoreCase = true) && it.current < it.total
             }
         }
+        val updated = requirement != null
+        requirement?.let { it.current += quantity }
 
         Logger.debugLog("Applied event order catch: $fishName x$quantity (updated=$updated)")
         if (updated) DialogCollection.refreshDialog(DIALOG_KEY)
