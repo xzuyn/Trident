@@ -117,9 +117,9 @@ class EventOrdersDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key),
                 maxFractionWidth
             ).coerceAtLeast(MIN_ROW_WIDTH)
 
-        OrderStorage.suggestedLocation()?.let { location ->
+        OrderStorage.suggestedCatch()?.let { catch ->
             StringWidget(
-                Component.literal("Suggested: ${location.displayName}")
+                Component.literal("Suggested: ${catch.fishName} (${catch.location.displayName})")
                     .mccFont()
                     .withColor(SUGGESTED_COLOR),
                 mcFont

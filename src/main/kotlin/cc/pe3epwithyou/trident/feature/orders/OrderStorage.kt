@@ -44,7 +44,13 @@ object OrderStorage {
     }
 
     /**
-     * The suggested [FishingLocation], per [cc.pe3epwithyou.trident.config.Config.Fishing.eventOrdersSuggestionMode]:
+     * A specific fish to catch, and where to catch it, that the "Suggested" line in the Event
+     * Orders dialog names (e.g. "Fern Flounder" at [FishingLocation.FROSTED_FOREST]).
+     */
+    data class SuggestedCatch(val fishName: String, val location: FishingLocation)
+
+    /**
+     * The suggested catch, per [cc.pe3epwithyou.trident.config.Config.Fishing.eventOrdersSuggestionMode]:
      * - [OrderSuggestionMode.MOST_NEEDED]: the location with the most fish still needed across
      *   every incomplete requirement (falls back to nothing further, this is the base mode).
      * - [OrderSuggestionMode.SOONEST_COMPLETION]: the location that would fully finish an order
@@ -53,9 +59,10 @@ object OrderStorage {
      *   just one). Falls back to [OrderSuggestionMode.MOST_NEEDED] if no such order exists.
      *
      * Both modes break ties by preferring the higher-[Rarity] order, then whichever order
-     * displays first. Null if there are no orders loaded, or every requirement is fulfilled.
+     * displays first. The named fish is whichever requirement drove that choice. Null if there
+     * are no orders loaded, or every requirement is fulfilled.
      */
-    fun suggestedLocation(): FishingLocation? {
+    fun suggestedCatch(): SuggestedCatch? {
         val orders = playerState().eventOrders.orders
         return when (Config.Fishing.eventOrdersSuggestionMode) {
             OrderSuggestionMode.MOST_NEEDED -> suggestedByMostNeeded(orders)
@@ -63,15 +70,21 @@ object OrderStorage {
         }
     }
 
-    private data class LocationTally(val location: FishingLocation, val amount: Int, val rarity: Rarity, val orderIndex: Int)
+    private data class LocationTally(
+        val location: FishingLocation,
+        val fishName: String,
+        val amount: Int,
+        val rarity: Rarity,
+        val orderIndex: Int,
+    )
 
-    private fun suggestedByMostNeeded(orders: List<Order>): FishingLocation? {
+    private fun suggestedByMostNeeded(orders: List<Order>): SuggestedCatch? {
         val contributions = orders.withIndex().flatMap { (index, order) ->
             order.requirements
                 .filter { it.current < it.total }
                 .mapNotNull { req ->
                     OrderFishData.find(req.fishName)?.location?.let { location ->
-                        LocationTally(location, req.total - req.current, order.rarity, index)
+                        LocationTally(location, req.fishName, req.total - req.current, order.rarity, index)
                     }
                 }
         }
@@ -79,22 +92,23 @@ object OrderStorage {
         return contributions.groupBy { it.location }
             .map { (location, items) ->
                 val total = items.sumOf { it.amount }
-                // Representative order for tie-breaking: whichever contributing order has the
-                // highest rarity, then whichever of those displays first.
+                // Representative contribution for the location: whichever contributing
+                // requirement belongs to the highest-rarity order, then whichever of those
+                // displays first. Its fish is the one named in the suggestion.
                 val representative = items.minWith(
                     compareByDescending<LocationTally> { it.rarity.ordinal }.thenBy { it.orderIndex }
                 )
-                LocationTally(location, total, representative.rarity, representative.orderIndex)
+                LocationTally(location, representative.fishName, total, representative.rarity, representative.orderIndex)
             }
             .minWithOrNull(
                 compareByDescending<LocationTally> { it.amount }
                     .thenByDescending { it.rarity.ordinal }
                     .thenBy { it.orderIndex }
             )
-            ?.location
+            ?.let { SuggestedCatch(it.fishName, it.location) }
     }
 
-    private fun suggestedBySoonestCompletion(orders: List<Order>): FishingLocation? {
+    private fun suggestedBySoonestCompletion(orders: List<Order>): SuggestedCatch? {
         return orders.withIndex().mapNotNull { (index, order) ->
             val incomplete = order.requirements.filter { it.current < it.total }
             if (incomplete.isEmpty()) return@mapNotNull null
@@ -102,11 +116,20 @@ object OrderStorage {
             val locations = incomplete.mapNotNull { OrderFishData.find(it.fishName)?.location }.toSet()
             if (locations.size != 1) return@mapNotNull null
 
-            LocationTally(locations.first(), incomplete.sumOf { it.total - it.current }, order.rarity, index)
+            // Name whichever requirement still needs the most fish; ties keep the first-listed.
+            val representative = incomplete.maxWithOrNull(compareBy { it.total - it.current }) ?: return@mapNotNull null
+
+            LocationTally(
+                locations.first(),
+                representative.fishName,
+                incomplete.sumOf { it.total - it.current },
+                order.rarity,
+                index
+            )
         }.minWithOrNull(
             compareBy<LocationTally> { it.amount }
                 .thenByDescending { it.rarity.ordinal }
                 .thenBy { it.orderIndex }
-        )?.location
+        )?.let { SuggestedCatch(it.fishName, it.location) }
     }
 }
