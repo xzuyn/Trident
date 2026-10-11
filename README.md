@@ -10,7 +10,7 @@ You can find more information about the mod’s features in the [Trident Docs](h
 - Minecraft 26.2
 - [Yet Another Config Lib](https://modrinth.com/mod/yacl)
 - [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
-- [Noxesium (3.0.0 and above)](https://modrinth.com/mod/noxesium)
+- [Noxesium (3.2.4 and above)](https://modrinth.com/mod/noxesium)
 
 ## Features
 
