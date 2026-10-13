@@ -53,7 +53,8 @@ object TridentCommand {
         "supplies" to ::SuppliesDialog,
         "questing" to ::QuestingDialog,
         "grumpycat" to ::DisappointedCatDialog,
-        "wayfinder" to ::WayfinderDialog
+        "wayfinder" to ::WayfinderDialog,
+        "fishing_record" to ::FishingRecordDialog
     )
 
     private fun notOnIsland(): Boolean {

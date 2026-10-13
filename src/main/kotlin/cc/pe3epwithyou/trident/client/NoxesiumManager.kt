@@ -6,6 +6,7 @@ import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.dojo.DOJO_SPLITS_DIALOG_KEY
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
+import cc.pe3epwithyou.trident.feature.fishing.FISHING_RECORD_DIALOG_KEY
 import cc.pe3epwithyou.trident.feature.friends.FriendsInServer
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
 import cc.pe3epwithyou.trident.feature.questing.GameQuests
@@ -13,6 +14,7 @@ import cc.pe3epwithyou.trident.feature.questing.IncrementContext
 import cc.pe3epwithyou.trident.feature.questing.QuestStorage
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.interfaces.dojo.DojoSplitsDialog
+import cc.pe3epwithyou.trident.interfaces.fishing.FishingRecordDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.SuppliesDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.WayfinderDialog
 import cc.pe3epwithyou.trident.interfaces.killfeed.KillFeedDialog
@@ -54,6 +56,10 @@ object NoxesiumManager {
         if (currentGame == Game.FISHING && Config.Fishing.wayfinderModule) {
             val k = "wayfinder"
             DialogCollection.open(k, WayfinderDialog(10, 10, k))
+        }
+        if (currentGame == Game.FISHING && Config.Fishing.recordModule) {
+            val k = FISHING_RECORD_DIALOG_KEY
+            DialogCollection.open(k, FishingRecordDialog(10, 10, k))
         }
         if (KillChatListener.killfeedGames.contains(currentGame) && Config.KillFeed.enabled) {
             val k = "killfeed"

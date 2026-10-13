@@ -19,6 +19,7 @@ import cc.pe3epwithyou.trident.feature.discord.IPCManager
 import cc.pe3epwithyou.trident.feature.disguise.Disguise
 import cc.pe3epwithyou.trident.feature.doll.Doll
 import cc.pe3epwithyou.trident.feature.exchange.ExchangeHandler
+import cc.pe3epwithyou.trident.feature.fishing.FishingRecord
 import cc.pe3epwithyou.trident.feature.fishing.OverclockClock
 import cc.pe3epwithyou.trident.feature.fishing.listeners.ResearchListeners
 import cc.pe3epwithyou.trident.feature.fishing.listeners.SuppliesListeners
@@ -108,6 +109,7 @@ class Trident : ModInitializer {
         NotificationLifecycle.register()
         SuppliesListeners.register()
         WayfinderListeners.register()
+        FishingRecord.register()
         ResearchListeners.register()
         ExchangeHandler.register()
         ActivityManager.Arena.register()

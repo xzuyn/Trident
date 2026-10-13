@@ -5,6 +5,8 @@ import cc.pe3epwithyou.trident.feature.api.ApiProvider
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoEnding
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitType
+import cc.pe3epwithyou.trident.feature.fishing.RecordEarnRate
+import cc.pe3epwithyou.trident.feature.fishing.RecordUpdateInterval
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedPosition
 import cc.pe3epwithyou.trident.feature.rarityslot.DisplayType
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
@@ -100,6 +102,18 @@ class Config {
 
     @SerialEntry
     var fishingWayfinderModuleCompact: Boolean = false
+
+    @SerialEntry
+    var fishingRecordModule: Boolean = true
+
+    @SerialEntry
+    var fishingRecordShowIcons: Boolean = true
+
+    @SerialEntry
+    var fishingRecordEarnRate: RecordEarnRate = RecordEarnRate.OFF
+
+    @SerialEntry
+    var fishingRecordUpdateInterval: RecordUpdateInterval = RecordUpdateInterval.ONE_SECOND
 
     @SerialEntry
     var fishingFlashIfDepleted: Boolean = true
@@ -300,6 +314,14 @@ class Config {
             get() = handler.instance().fishingWayfinderModule
         val wayfinderModuleCompact: Boolean
             get() = handler.instance().fishingWayfinderModuleCompact
+        val recordModule: Boolean
+            get() = handler.instance().fishingRecordModule
+        val recordShowIcons: Boolean
+            get() = handler.instance().fishingRecordShowIcons
+        val recordEarnRate: RecordEarnRate
+            get() = handler.instance().fishingRecordEarnRate
+        val recordUpdateInterval: RecordUpdateInterval
+            get() = handler.instance().fishingRecordUpdateInterval
     }
 
     object Games {

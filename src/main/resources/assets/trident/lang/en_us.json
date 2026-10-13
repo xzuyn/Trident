@@ -95,6 +95,17 @@
   "config.trident.fishing.show_augment_status_in_interface.name": "Show Augment Status in Interface",
   "config.trident.fishing.show_augment_status_in_interface.description": "Displays the status of your Augments (Broken, Needs repairing, Paused) in the Fishing Supplies menu on MCC Island.",
 
+  "config.trident.fishing.record.name": "Fishing Record Module",
+  "config.trident.fishing.record.description": "Shows a window that tracks your time spent fishing, reel-ins, XP, and catches by type, with optional earn rates.",
+  "config.trident.fishing.record_module.name": "Enabled",
+  "config.trident.fishing.record_module.description": "Turns on the Fishing Record Module.",
+  "config.trident.fishing.record_show_icons.name": "Show Icons",
+  "config.trident.fishing.record_show_icons.description": "Shows an icon next to each stat in the Fishing Record.",
+  "config.trident.fishing.record_earn_rate.name": "Earn Rate",
+  "config.trident.fishing.record_earn_rate.description": "Shows each stat's earn rate in parentheses next to its value, either per minute or per hour.",
+  "config.trident.fishing.record_update_interval.name": "Update Interval",
+  "config.trident.fishing.record_update_interval.description": "How often the Fishing Record's time and earn rates update. 'On catch' keeps the time ticking every second but only refreshes earn rates when you reel something in.",
+
   "config.trident.games.name": "All Games",
   "config.trident.games.auto_focus.name": "Focus game on countdown",
   "config.trident.games.auto_focus.description": "Automatically focuses Minecraft when your game is about to start.",
