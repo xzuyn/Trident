@@ -21,6 +21,7 @@ import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.interfaces.debug.StateDialog
 import cc.pe3epwithyou.trident.interfaces.experiment.TabbedDialog
+import cc.pe3epwithyou.trident.interfaces.fishing.FishingRecordDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.ResearchDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.SuppliesDialog
 import cc.pe3epwithyou.trident.interfaces.fishing.WayfinderDialog
