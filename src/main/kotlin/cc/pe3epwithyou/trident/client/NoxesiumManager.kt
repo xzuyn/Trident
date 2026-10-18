@@ -3,6 +3,7 @@ package cc.pe3epwithyou.trident.client
 import cc.pe3epwithyou.trident.client.listeners.ChatEventListener
 import cc.pe3epwithyou.trident.client.listeners.KillChatListener
 import cc.pe3epwithyou.trident.config.Config
+import cc.pe3epwithyou.trident.feature.FocusGame
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
 import cc.pe3epwithyou.trident.feature.dojo.DOJO_SPLITS_DIALOG_KEY
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
@@ -119,6 +120,7 @@ object NoxesiumManager {
 
             val currentGame = getCurrentGame(server, types)
             MCCIState.isPlobbyGame = "session" in types
+            FocusGame.handleGameJoin(currentGame)
             if (currentGame == Game.HUB) {
                 MCCIState.lobbyGame = parseGameString(types.getOrNull(2) ?: "lobby")
                 Logger.debugLog("Current lobbygame: ${MCCIState.lobbyGame.title}")

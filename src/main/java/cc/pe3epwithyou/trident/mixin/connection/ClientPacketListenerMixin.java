@@ -1,6 +1,5 @@
 package cc.pe3epwithyou.trident.mixin.connection;
 
-import cc.pe3epwithyou.trident.feature.FocusGame;
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer;
 import cc.pe3epwithyou.trident.feature.fishing.WayfinderModule;
 import cc.pe3epwithyou.trident.feature.questing.QuestListener;
@@ -20,12 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerMixin {
-    @Inject(method = "setSubtitleText", at = @At("TAIL"))
-    private void trident$setSubtitleText(ClientboundSetSubtitleTextPacket packet, CallbackInfo ci) {
-        if (!MCCIState.INSTANCE.isOnIsland()) return;
-        FocusGame.INSTANCE.handleSubtitle(packet.text().getString());
-    }
-
     // Runs before the vanilla subtitle is actually displayed, so the Dojo split timer can
     // rewrite the subtitle (to append a split improvement indicator) and cancel the vanilla
     // display when needed.

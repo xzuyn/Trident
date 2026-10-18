@@ -107,8 +107,8 @@
   "config.trident.fishing.record_update_interval.description": "How often the Fishing Record's time and earn rates update. 'On catch' keeps the time ticking every second but only refreshes earn rates when you reel something in.",
 
   "config.trident.games.name": "All Games",
-  "config.trident.games.auto_focus.name": "Focus game on countdown",
-  "config.trident.games.auto_focus.description": "Automatically focuses Minecraft when your game is about to start.",
+  "config.trident.games.auto_focus.name": "Focus game on join",
+  "config.trident.games.auto_focus.description": "Automatically focuses Minecraft when you enter a game.",
 
   "config.trident.dojo.name": "Parkour Warrior: Dojo",
   "config.trident.dojo.enabled.name": "Enabled",
