@@ -5,9 +5,10 @@ import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.state.Game
 import cc.pe3epwithyou.trident.state.MCCIState
 import cc.pe3epwithyou.trident.utils.Logger
+import cc.pe3epwithyou.trident.utils.extensions.ItemStackExtensions.findInLore
+import cc.pe3epwithyou.trident.utils.parseFormattedInt
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
-import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.FormattedText
 import net.minecraft.network.chat.HoverEvent
@@ -38,7 +39,8 @@ enum class RecordStat(val label: String, val glyph: String) {
  * "You earned: N Island XP" message that follows completes (and records) it.
  *
  * The A.N.G.L.R. token value of a catch isn't in the chat text; it's in the "Value: N" line of the
- * item tooltip attached to the caught item, so that is read from the message's hover event.
+ * item tooltip attached to the caught item, so that is read from the message's hover event using the
+ * same lore helpers ([findInLore]) the other features use on container items.
  */
 object FishingRecord {
     private val CAUGHT_PATTERN = Regex("""\([^)]*\) You caught: \[(.+?)](?: x(\d+))?\s*$""")
@@ -148,13 +150,14 @@ object FishingRecord {
     private fun readTokenValue(message: Component): Int {
         var value = 0
         message.visit(FormattedText.StyledContentConsumer<Unit> { style, _ ->
-            val item = (style.hoverEvent as? HoverEvent.ShowItem)?.item()
-            if (item == null) {
+            val template = (style.hoverEvent as? HoverEvent.ShowItem)?.item()
+            if (template == null) {
                 Optional.empty<Unit>()
             } else {
-                value = item.components.get(DataComponents.LORE)?.lines()?.firstNotNullOfOrNull { line ->
-                    TOKEN_VALUE_PATTERN.find(line.string)?.groupValues?.get(1)?.replace(",", "")?.toIntOrNull()
-                } ?: 0
+                // In 26.x a ShowItem holds an ItemStackTemplate; create() gives the ItemStack that
+                // findInLore (the same helper used for container items elsewhere) works on
+                value = template.create().findInLore(TOKEN_VALUE_PATTERN)
+                    ?.groups?.get(1)?.value?.parseFormattedInt() ?: 0
                 Optional.of(Unit) // found the item tooltip, stop visiting
             }
         }, Style.EMPTY)
