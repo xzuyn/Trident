@@ -14,7 +14,8 @@ object FishingSpotListener {
     data class FishingSpot(
         val x: Double,
         val y: Double,
-        val perks: List<Pair<Perk, Double>>? = null
+        val perks: List<Pair<Perk, Double>>? = null,
+        val isEvent: Boolean = false
     ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -60,7 +61,7 @@ object FishingSpotListener {
         val entities = level.getEntities(null, box).filterIsInstance<Display.TextDisplay>()
         val display: Display.TextDisplay = entities.firstOrNull() ?: return null
         val perks = FishingSpotParser.parse(display.text)
-        val spot = FishingSpot(display.x, display.y, perks)
+        val spot = FishingSpot(display.x, display.y, perks, "Event Fishing Spot" in display.text.string)
         return spot
     }
 }

@@ -1,5 +1,6 @@
 package cc.pe3epwithyou.trident.feature.fishing
 
+import cc.pe3epwithyou.trident.client.listeners.FishingSpotListener
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.state.Game
@@ -125,6 +126,13 @@ object FishingRecord {
     }
 
     private fun record(category: CatchCategory, count: Int, xp: Int, tokenValue: Int) {
+        if (FishingSpotListener.currentSpot?.isEvent == true) {
+            // Event Fishing Spots only count towards XP
+            add(RecordStat.XP, xp)
+            refreshOnCatchRates()
+            DialogCollection.refreshDialog(FISHING_RECORD_DIALOG_KEY)
+            return
+        }
         add(RecordStat.REEL_INS, 1)
         add(RecordStat.XP, xp)
         // The tooltip shows the value of one item, and a catch can be several of them (e.g. "x3")
