@@ -58,7 +58,7 @@ class FishingRecordDialog(x: Int, y: Int, key: String) : TridentDialog(x, y, key
 
         RecordStat.entries.forEach { stat ->
             val amount = FishingRecord.amount(stat)
-            val value = if (stat == RecordStat.XP) "%,d".format(amount) else amount.toString()
+            val value = if (stat == RecordStat.XP || stat == RecordStat.TOKENS) "%,d".format(amount) else amount.toString()
             StringWidget(
                 row(stat.glyph, stat.label, value, FishingRecord.earnRateSuffix(stat)), font
             ).atBottom(0, settings = LayoutConstants.LEFT)

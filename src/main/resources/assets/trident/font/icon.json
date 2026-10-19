@@ -167,6 +167,15 @@
       "chars": [
         "\uE020"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "trident:_font/record_tokens.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE021"
+      ]
     }
   ]
 }
