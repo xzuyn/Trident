@@ -126,7 +126,7 @@ object FishingRecord {
     }
 
     private fun record(category: CatchCategory, count: Int, xp: Int, tokenValue: Int) {
-        if (FishingSpotListener.currentSpot?.isEvent == true) {
+        if (FishingSpotListener.isFishingAtEventSpot) {
             // Event Fishing Spots only count towards XP
             add(RecordStat.XP, xp)
             refreshOnCatchRates()

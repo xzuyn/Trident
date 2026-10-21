@@ -38,12 +38,25 @@ object FishingSpotListener {
      **/
     var currentSpot: FishingSpot? = null
 
+    /**
+     * Whether the current cast was made at an "Event Fishing Spot". This is decided when the hook lands
+     * and kept for the rest of that cast, because the spot's display can change or disappear (e.g. when
+     * the spot gets depleted) before the catch messages arrive.
+     */
+    var isFishingAtEventSpot: Boolean = false
+        private set
+    private var castHook: FishingHook? = null
+
     fun handle() {
         val hook = minecraft().player?.fishing
         if (hook == null || !hook.isInLiquid) {
             return
         }
         val spot = findNearestSpot(hook)
+        if (hook !== castHook) {
+            castHook = hook
+            isFishingAtEventSpot = spot?.isEvent == true
+        }
         if (spot == null && currentSpot != null) {
             currentSpot = null
             return
