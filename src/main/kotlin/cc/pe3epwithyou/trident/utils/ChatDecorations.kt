@@ -45,6 +45,9 @@ object ChatDecorations {
         override fun getY(): Int = minecraft().window.guiScaledHeight - CHAT_HEIGHT - HEIGHT - 1
         override fun getX(): Int = if (utilsCompatible()) 2 else (minecraft().window.guiScaledWidth - this.layout.getWidth() - 2)
 
+        // Keep the chat input focused after clicking a button, so Ctrl+V works right after the location button
+        override fun shouldTakeFocusAfterInteraction(): Boolean = false
+
         override val layout = GridLayout(2) {
             var col = 0
             getWidgets().forEach {
