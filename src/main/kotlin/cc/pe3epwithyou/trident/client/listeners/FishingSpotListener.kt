@@ -14,8 +14,7 @@ object FishingSpotListener {
     data class FishingSpot(
         val x: Double,
         val y: Double,
-        val perks: List<Pair<Perk, Double>>? = null,
-        val isEvent: Boolean = false
+        val perks: List<Pair<Perk, Double>>? = null
     ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -38,25 +37,12 @@ object FishingSpotListener {
      **/
     var currentSpot: FishingSpot? = null
 
-    /**
-     * Whether the current cast was made at an "Event Fishing Spot". This is decided when the hook lands
-     * and kept for the rest of that cast, because the spot's display can change or disappear (e.g. when
-     * the spot gets depleted) before the catch messages arrive.
-     */
-    var isFishingAtEventSpot: Boolean = false
-        private set
-    private var castHook: FishingHook? = null
-
     fun handle() {
         val hook = minecraft().player?.fishing
         if (hook == null || !hook.isInLiquid) {
             return
         }
         val spot = findNearestSpot(hook)
-        if (hook !== castHook) {
-            castHook = hook
-            isFishingAtEventSpot = spot?.isEvent == true
-        }
         if (spot == null && currentSpot != null) {
             currentSpot = null
             return
@@ -74,7 +60,7 @@ object FishingSpotListener {
         val entities = level.getEntities(null, box).filterIsInstance<Display.TextDisplay>()
         val display: Display.TextDisplay = entities.firstOrNull() ?: return null
         val perks = FishingSpotParser.parse(display.text)
-        val spot = FishingSpot(display.x, display.y, perks, "Event Fishing Spot" in display.text.string)
+        val spot = FishingSpot(display.x, display.y, perks)
         return spot
     }
 }

@@ -1,6 +1,5 @@
 package cc.pe3epwithyou.trident.feature.fishing
 
-import cc.pe3epwithyou.trident.client.listeners.FishingSpotListener
 import cc.pe3epwithyou.trident.config.Config
 import cc.pe3epwithyou.trident.interfaces.DialogCollection
 import cc.pe3epwithyou.trident.state.Game
@@ -53,7 +52,12 @@ object FishingRecord {
     private const val CATCH_TIMEOUT_TICKS = 20 * 3
 
     /** [tokenValue] is the A.N.G.L.R. token value of a single caught item (0 if the tooltip has none). */
-    private class PendingCatch(val category: CatchCategory, val count: Int, val tokenValue: Int) {
+    private class PendingCatch(
+        val category: CatchCategory,
+        val count: Int,
+        val tokenValue: Int,
+        val isTicketScrap: Boolean
+    ) {
         var idleTicks = 0
     }
 
@@ -107,7 +111,7 @@ object FishingRecord {
             val count = it.groupValues[2].takeIf(String::isNotEmpty)?.toIntOrNull() ?: 1
             val tokenValue = readTokenValue(message)
             Logger.debugLog("Caught $name x$count, token value per item: $tokenValue")
-            pending = PendingCatch(CatchCategory.fromItemName(name), count, tokenValue)
+            pending = PendingCatch(CatchCategory.fromItemName(name), count, tokenValue, "Ticket Scrap" in name)
             return
         }
 
@@ -120,14 +124,14 @@ object FishingRecord {
 
         XP_PATTERN.find(text)?.let {
             val xp = it.groupValues[1].replace(",", "").toIntOrNull() ?: 0
-            record(current.category, current.count, xp, current.tokenValue)
+            record(current.category, current.count, xp, current.tokenValue, current.isTicketScrap)
             pending = null
         }
     }
 
-    private fun record(category: CatchCategory, count: Int, xp: Int, tokenValue: Int) {
-        if (FishingSpotListener.isFishingAtEventSpot) {
-            // Event Fishing Spots only count towards XP
+    private fun record(category: CatchCategory, count: Int, xp: Int, tokenValue: Int, isTicketScrap: Boolean) {
+        if (isTicketScrap) {
+            // Ticket Scraps (Event Fishing Spots) only count towards XP
             add(RecordStat.XP, xp)
             refreshOnCatchRates()
             DialogCollection.refreshDialog(FISHING_RECORD_DIALOG_KEY)

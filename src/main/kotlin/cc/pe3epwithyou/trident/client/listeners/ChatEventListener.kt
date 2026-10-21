@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component
 object ChatEventListener {
     private var isSupplyPreserve = false
     private var triggerBait = true
+    private var isTicketScrap = false
     private var catchFinished = true
     var triggeredAugments: MutableList<AugmentTrigger> = mutableListOf()
 
@@ -114,6 +115,7 @@ object ChatEventListener {
                     isSupplyPreserve = false
                     val isJunk = isJunk(message)
                     triggerBait = !isJunk
+                    isTicketScrap = "Ticket Scrap" in it.groupValues[1]
                 }
 
 
@@ -144,8 +146,8 @@ object ChatEventListener {
 
                     triggeredAugments.clear()
 
-                    // Event Fishing Spots don't use up the fishing line or bait
-                    if (!FishingSpotListener.isFishingAtEventSpot) {
+                    // Ticket Scraps (Event Fishing Spots) don't use up the fishing line or bait
+                    if (!isTicketScrap) {
                         playerState().supplies.line.uses?.let {
                             if (it != 0) playerState().supplies.line.uses = it - 1
                         }
