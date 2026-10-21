@@ -144,13 +144,16 @@ object ChatEventListener {
 
                     triggeredAugments.clear()
 
-                    playerState().supplies.line.uses?.let {
-                        if (it != 0) playerState().supplies.line.uses = it - 1
-                    }
+                    // Event Fishing Spots don't use up the fishing line or bait
+                    if (FishingSpotListener.currentSpot?.isEvent != true) {
+                        playerState().supplies.line.uses?.let {
+                            if (it != 0) playerState().supplies.line.uses = it - 1
+                        }
 
-                    if (triggerBait) {
-                        playerState().supplies.bait.amount?.let {
-                            if (it != 0) playerState().supplies.bait.amount = it - 1
+                        if (triggerBait) {
+                            playerState().supplies.bait.amount?.let {
+                                if (it != 0) playerState().supplies.bait.amount = it - 1
+                            }
                         }
                     }
 
