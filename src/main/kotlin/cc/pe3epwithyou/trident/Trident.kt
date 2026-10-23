@@ -8,6 +8,7 @@ import cc.pe3epwithyou.trident.client.listeners.FishingSpotListener
 import cc.pe3epwithyou.trident.client.listeners.KillChatListener
 import cc.pe3epwithyou.trident.client.listeners.registerScreenEvents
 import cc.pe3epwithyou.trident.config.Config
+import cc.pe3epwithyou.trident.feature.EventReminder
 import cc.pe3epwithyou.trident.feature.chat.ChatControllerManager
 import cc.pe3epwithyou.trident.feature.chat.chatroom.Chatrooms
 import cc.pe3epwithyou.trident.feature.crafting.CraftingNotifications
@@ -115,6 +116,7 @@ class Trident : ModInitializer {
         ActivityManager.Arena.register()
         Doll.register()
         CraftingNotifications.register()
+        EventReminder.register()
         Disguise.register()
         QuestLock.register()
         Chatrooms.register()

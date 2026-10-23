@@ -64,6 +64,9 @@ class Config {
     var globalCraftingNotifications: Boolean = true
 
     @SerialEntry
+    var globalEventReminders: Boolean = true
+
+    @SerialEntry
     var globalQuestLock: Boolean = true
 
     @SerialEntry
@@ -267,6 +270,8 @@ class Config {
             get() = handler.instance().globalCosmeticPreview
         val craftingNotifications: Boolean
             get() = handler.instance().globalCraftingNotifications
+        val eventReminders: Boolean
+            get() = handler.instance().globalEventReminders
         val questLock: Boolean
             get() = handler.instance().globalQuestLock
         val friendsInServer: Boolean

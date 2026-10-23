@@ -153,6 +153,13 @@ fun generalCategory(categoriesRegistrar: CategoryRegistrar) {
             available(utilsCompatible())
         }
 
+        rootOptions.register("event_reminders") {
+            name(Component.translatable("config.trident.global.event_reminders.name"))
+            description(OptionDescription.of(Component.translatable("config.trident.global.event_reminders.description")))
+            binding(handler.instance()::globalEventReminders, true)
+            controller(tickBox())
+        }
+
         rootOptions.register("quest_lock") {
             name(Component.translatable("config.trident.global.quest_lock.name"))
             description(

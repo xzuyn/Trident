@@ -35,6 +35,8 @@
   "config.trident.global.cosmetic_preview.description": "Renders a small preview of your character with your equipped cosmetics and allows you to preview other. Includes the ability to preview different chroma sets on weapon skins.\n\n§6Disabled if Island Utils is installed",
   "config.trident.global.crafting_notifications.name": "Crafting Notifications",
   "config.trident.global.crafting_notifications.description": "Displays a notification when your item finishes crafting.\n\n§6Disabled if Island Utils is installed",
+  "config.trident.global.event_reminders.name": "Event Reminders",
+  "config.trident.global.event_reminders.description": "Displays a notification every 15 minutes with the event game that is starting.",
   "config.trident.global.quest_lock.name": "Quest Lock",
   "config.trident.global.quest_lock.description": "When enabled, prevents you from accidentally refreshing quests from the selected game.",
   "config.trident.global.friends_in_server.name": "Friends in current server",
