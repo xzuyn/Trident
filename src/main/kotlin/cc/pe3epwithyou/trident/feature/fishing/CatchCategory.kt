@@ -5,7 +5,7 @@ package cc.pe3epwithyou.trident.feature.fishing
  * Compact Fishing Message.
  */
 enum class CatchCategory {
-    JUNK, NORMAL_FISH, ELUSIVE_FISH, PEARL, TREASURE, SPIRIT;
+    JUNK, NORMAL_FISH, ELUSIVE_FISH, PEARL, TREASURE, SPIRIT, PURE_SPIRIT;
 
     companion object {
         private val JUNK_ITEMS = setOf(
@@ -22,11 +22,25 @@ enum class CatchCategory {
         )
 
         private val SPIRIT_ITEMS = setOf(
-            "Strong Spirit", "Refined Strong Spirit", "Pure Strong Spirit", "Wise Spirit",
-            "Refined Wise Spirit", "Pure Wise Spirit", "Glimmering Spirit", "Refined Glimmering Spirit",
-            "Pure Glimmering Spirit", "Greedy Spirit", "Refined Greedy Spirit", "Pure Greedy Spirit",
-            "Lucky Spirit", "Refined Lucky Spirit", "Pure Lucky Spirit"
+            "Strong Spirit", "Refined Strong Spirit", "Wise Spirit",
+            "Refined Wise Spirit", "Glimmering Spirit", "Refined Glimmering Spirit",
+            "Greedy Spirit", "Refined Greedy Spirit",
+            "Lucky Spirit", "Refined Lucky Spirit"
         )
+
+        /** Pure Spirits can't be crafted from lesser spirits, so they're counted separately. */
+        private val PURE_SPIRIT_ITEMS = setOf(
+            "Pure Strong Spirit", "Pure Wise Spirit", "Pure Glimmering Spirit",
+            "Pure Greedy Spirit", "Pure Lucky Spirit"
+        )
+
+        /** Base units one caught item is worth, as tiers are exchangeable (10 Rough = 1 Polished, etc.). */
+        fun unitValue(name: String): Int = when {
+            name == "Polished Pearl" -> 10
+            name == "Pristine Pearl" -> 100
+            name.startsWith("Refined ") -> 10
+            else -> 1
+        }
 
         /** Elusive fish across all twelve fishing islands. */
         private val ELUSIVE_FISH_ITEMS = setOf(
@@ -53,6 +67,7 @@ enum class CatchCategory {
             name in PEARL_ITEMS -> PEARL
             name in TREASURE_ITEMS -> TREASURE
             name in SPIRIT_ITEMS -> SPIRIT
+            name in PURE_SPIRIT_ITEMS -> PURE_SPIRIT
             ELUSIVE_FISH_ITEMS.any { it in name } -> ELUSIVE_FISH
             else -> NORMAL_FISH
         }

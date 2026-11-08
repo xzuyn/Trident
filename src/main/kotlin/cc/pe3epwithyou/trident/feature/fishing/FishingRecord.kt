@@ -28,6 +28,7 @@ enum class RecordStat(val label: String, val glyph: String) {
     PEARL("Pearl", "\uE01E"),
     TREASURE("Treasure", "\uE01F"),
     SPIRIT("Spirit", "\uE020"),
+    PURE_SPIRIT("Pure Spirit", "\uE020"),
 }
 
 /**
@@ -56,7 +57,9 @@ object FishingRecord {
         val category: CatchCategory,
         val count: Int,
         val tokenValue: Int,
-        val isTicketScrap: Boolean
+        val isTicketScrap: Boolean,
+        /** Base units each caught item is worth in its category (e.g. Pristine Pearl = 100). */
+        val unitValue: Int
     ) {
         var idleTicks = 0
     }
@@ -111,7 +114,7 @@ object FishingRecord {
             val count = it.groupValues[2].takeIf(String::isNotEmpty)?.toIntOrNull() ?: 1
             val tokenValue = readTokenValue(message)
             Logger.debugLog("Caught $name x$count, token value per item: $tokenValue")
-            pending = PendingCatch(CatchCategory.fromItemName(name), count, tokenValue, "Ticket Scrap" in name)
+            pending = PendingCatch(CatchCategory.fromItemName(name), count, tokenValue, "Ticket Scrap" in name, CatchCategory.unitValue(name))
             return
         }
 
@@ -124,12 +127,12 @@ object FishingRecord {
 
         XP_PATTERN.find(text)?.let {
             val xp = it.groupValues[1].replace(",", "").toIntOrNull() ?: 0
-            record(current.category, current.count, xp, current.tokenValue, current.isTicketScrap)
+            record(current.category, current.count, xp, current.tokenValue, current.isTicketScrap, current.unitValue)
             pending = null
         }
     }
 
-    private fun record(category: CatchCategory, count: Int, xp: Int, tokenValue: Int, isTicketScrap: Boolean) {
+    private fun record(category: CatchCategory, count: Int, xp: Int, tokenValue: Int, isTicketScrap: Boolean, unitValue: Int) {
         if (isTicketScrap) {
             // Ticket Scraps (Event Fishing Spots) only count towards XP
             add(RecordStat.XP, xp)
@@ -149,7 +152,8 @@ object FishingRecord {
                 CatchCategory.PEARL -> RecordStat.PEARL
                 CatchCategory.TREASURE -> RecordStat.TREASURE
                 CatchCategory.SPIRIT -> RecordStat.SPIRIT
-            }, count
+                CatchCategory.PURE_SPIRIT -> RecordStat.PURE_SPIRIT
+            }, count * unitValue
         )
         refreshOnCatchRates()
         DialogCollection.refreshDialog(FISHING_RECORD_DIALOG_KEY)
