@@ -76,6 +76,16 @@ object FishingRecord {
 
     fun amount(stat: RecordStat): Int = amounts[stat] ?: 0
 
+    /** Clears everything recorded so far (time, amounts, cached rates and any in-progress catch). */
+    fun reset() {
+        pending = null
+        tickCounter = 0
+        fishingTime = 0
+        amounts.clear()
+        onCatchRates.clear()
+        DialogCollection.refreshDialog(FISHING_RECORD_DIALOG_KEY)
+    }
+
     fun register() {
         ClientTickEvents.END_CLIENT_TICK.register { tick() }
         ClientReceiveMessageEvents.ALLOW_GAME.register allow@{ message, _ ->

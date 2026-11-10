@@ -15,6 +15,7 @@ import cc.pe3epwithyou.trident.feature.disguise.Disguise
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitTimer
 import cc.pe3epwithyou.trident.feature.exchange.ExchangeHandler
+import cc.pe3epwithyou.trident.feature.fishing.FishingRecord
 import cc.pe3epwithyou.trident.feature.fishing.OverclockHandlers
 import cc.pe3epwithyou.trident.feature.killfeed.KillMethod
 import cc.pe3epwithyou.trident.feature.killfeed.KillfeedLifecycle
@@ -120,6 +121,21 @@ object TridentCommand {
                     val c = Component.literal("Your Dojo splits have been successfully ")
                         .withSwatch(TridentFont.TRIDENT_COLOR).append(
                             Component.literal("cleared").withSwatch(TridentFont.ERROR)
+                        )
+                    Logger.sendMessage(c)
+                }
+            }
+
+            /**
+             * Resets the Fishing Record (time, reel-ins, XP, catches) without restarting the game
+             */
+            literal("resetfishingrecord") {
+                executes {
+                    FishingRecord.reset()
+
+                    val c = Component.literal("Your Fishing Record has been successfully ")
+                        .withSwatch(TridentFont.TRIDENT_COLOR).append(
+                            Component.literal("reset").withSwatch(TridentFont.ERROR)
                         )
                     Logger.sendMessage(c)
                 }
