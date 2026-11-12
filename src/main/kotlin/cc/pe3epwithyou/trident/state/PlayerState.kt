@@ -156,6 +156,7 @@ data class PlayerState(
     var craftingNotifications: CraftingNotifications = CraftingNotifications(),
     var activeChatrooms: MutableList<Chatrooms.Chatroom> = mutableListOf(),
     var dojoSplits: MutableMap<String, DojoCourseSplits> = mutableMapOf(),
+    var crateChances: MutableMap<String, Double> = mutableMapOf(),
 )
 
 object PlayerStateIO {

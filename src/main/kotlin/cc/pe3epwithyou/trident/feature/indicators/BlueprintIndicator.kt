@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.Identifier
 import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
 import kotlin.jvm.optionals.getOrNull
 
 object BlueprintIndicator {
@@ -16,6 +17,11 @@ object BlueprintIndicator {
     fun checkItem(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (minecraft().gui.screen() !is ContainerScreen) return
         checkLore(graphics, slot)
+    }
+
+    fun readBlueprint(stack: ItemStack): BlueprintData? {
+        val tag = stack.components.get(DataComponents.CUSTOM_DATA)?.copyTag() ?: return null
+        return parseTag(tag)
     }
 
     private fun checkLore(graphics: GuiGraphicsExtractor, slot: Slot) {

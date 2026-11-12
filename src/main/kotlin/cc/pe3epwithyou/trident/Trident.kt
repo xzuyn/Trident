@@ -13,6 +13,7 @@ import cc.pe3epwithyou.trident.feature.chat.ChatControllerManager
 import cc.pe3epwithyou.trident.feature.chat.chatroom.Chatrooms
 import cc.pe3epwithyou.trident.feature.crafting.CraftingNotifications
 import cc.pe3epwithyou.trident.feature.crafting.NotificationLifecycle
+import cc.pe3epwithyou.trident.feature.crate.CrateChances
 import cc.pe3epwithyou.trident.feature.debug.TridentDebugEntry
 import cc.pe3epwithyou.trident.feature.dojo.DojoSplitManager
 import cc.pe3epwithyou.trident.feature.discord.ActivityManager
@@ -120,6 +121,7 @@ class Trident : ModInitializer {
         Disguise.register()
         QuestLock.register()
         Chatrooms.register()
+        CrateChances.register()
 
 //        Register keybinding
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: Minecraft ->
