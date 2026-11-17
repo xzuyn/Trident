@@ -2,6 +2,7 @@ package cc.pe3epwithyou.trident.mixin;
 
 import cc.pe3epwithyou.trident.feature.chat.chatroom.Chatrooms;
 import cc.pe3epwithyou.trident.feature.crate.CrateChances;
+import cc.pe3epwithyou.trident.feature.crate.TrophyRatio;
 import cc.pe3epwithyou.trident.feature.doll.Doll;
 import cc.pe3epwithyou.trident.feature.questing.lock.QuestLock;
 import cc.pe3epwithyou.trident.state.MCCIState;
@@ -36,6 +37,8 @@ public class ItemStackMixin {
     void trident$getTooltipLines(Item.TooltipContext context, @Nullable Player player, TooltipFlag tooltipFlag, CallbackInfoReturnable<List<Component>> cir) {
         if (!MCCIState.INSTANCE.isOnIsland()) return;
         List<Component> lines = new ArrayList<>(cir.getReturnValue());
-        if (CrateChances.modifyTooltip(lines)) cir.setReturnValue(lines);
+        boolean changed = CrateChances.modifyTooltip(lines);
+        changed |= TrophyRatio.modifyTooltip(lines);
+        if (changed) cir.setReturnValue(lines);
     }
 }
